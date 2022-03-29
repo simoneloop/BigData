@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
               'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
-              'Poland', 'Portugal', 'Czech Republic', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
               'Hungary']
 
 
