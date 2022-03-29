@@ -59,3 +59,4 @@ if __name__ == '__main__':
 
             back=browser.find_elements(By.CLASS_NAME,"left-panel-back-button")[0]
             back.click()
+print("test")
