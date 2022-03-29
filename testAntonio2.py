@@ -56,17 +56,6 @@ if __name__ == '__main__':
 
          if (stato in stati):
 
-               if(stato not in l):
-                 l.append((stato))
-
-
-    print(len(l))
-    l1=[]
-    for i in range(0,len(stati)):
-          if (stati[i] not in l):
-              l1.append(stati[i])
-
-    print(l1)
 
 
 browser.close()
