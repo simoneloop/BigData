@@ -17,9 +17,20 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
+def get_production_data(data):
+    print("")
+    # print(data)
+    #TODO parser
 
+def get_exchange_data(data):
+    print("")
+    # print(data)
+    #TODO parser
 
-
+def get_carbon_data(data):
+    for d in data:
+        print(d.text)
+    #TODO parser
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     url_elettricity_map = "https://app.electricitymap.org/map"
@@ -38,7 +49,7 @@ if __name__ == '__main__':
 
     s=Service("chromedriver.exe")
     browser = webdriver.Chrome(service=s)
-    # browser = webdriver.Chrome(service=s, chrome_options=chrome_options)
+    # browser = webdriver.Chrome(service=s,options=chrome_options)
 
     browser.get(url_elettricity_map)
     time.sleep(2)
@@ -61,6 +72,11 @@ if __name__ == '__main__':
             time.sleep(2)
             left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0] # cliccato il paese prendiamo il pannello a sinistra
             time.sleep(2)
+            body=browser.find_elements(By.TAG_NAME,"body")[0]
+            time.sleep(2)
+            carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
+            get_carbon_data(carbon_data)
+
             rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
             time.sleep(2)
             action = ActionChains(browser)
@@ -78,9 +94,10 @@ if __name__ == '__main__':
                     except:
                         print("no")
                 if (production_popup):
-                    print(production_popup.text)
+                    get_production_data(production_popup.text)
+
                 elif (exchange_popup):
-                    print(exchange_popup.text)
+                    get_exchange_data(exchange_popup.text)
                 print("###########################################")
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
