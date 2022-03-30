@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     stati = ['France']
 
-    s=Service("C:\\workSpacepy\\bigdataprove\\chromedriver.exe")
+    s=Service("drivers/chromedriver.exe")
     browser = webdriver.Chrome(service=s)
 
     browser.get(url_elettricity_map)
@@ -63,22 +63,17 @@ if __name__ == '__main__':
             action = ActionChains(browser)
             for r in rows:
                 action.move_to_element(r).perform()
-                time.sleep(2)
-                try:
-                    info = browser.find_element(By.ID, "countrypanel-production-tooltip")
-                    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-                    if(len(info.text) != 0):
-                             info = browser.find_element(By.ID, "countrypanel-production-tooltip")
-                             print(info.text)
-                             print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-                    else:
-                             info1 = browser.find_elements(By.ID, "countrypanel-exchange-tooltip")
-                             print(info1.text)
-
-                except:
-                        print("LINEA VUOTA")
-
-
+                time.sleep(1.5)
+                body = browser.find_elements(By.TAG_NAME, "body")[0]
+                production_popup = None
+                exchange_popup = None
+                production_popup = body.find_element_by_id("countrypanel-production-tooltip")
+                exchange_popup = body.find_element_by_id("countrypanel-exchange-tooltip")
+                if (production_popup):
+                    print(production_popup.text)
+                elif (exchange_popup):
+                    print(exchange_popup.text)
+                print("###########################################")
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
             zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]

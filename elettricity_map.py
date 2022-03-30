@@ -25,7 +25,6 @@ if __name__ == '__main__':
     zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
     #print("numero zone",len(zone_list))
     zones=zone_list.find_elements(By.TAG_NAME,"a")
-
     for i in range (int(index_to_start),int(index_to_stop)):
         zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
         zones=zone_list.find_elements(By.TAG_NAME,"a")
@@ -43,20 +42,27 @@ if __name__ == '__main__':
             for r in rows:
                 action.move_to_element(r).perform()
                 time.sleep(1.5)
+                body=browser.find_elements(By.TAG_NAME,"body")[0]
+                production_popup=None
+                exchange_popup=None
                 try:
-                    info=browser.find_element(By.ID,"countrypanel-production-tooltip")
-                    print(info.text)
-                    print("###########################################")
+                    production_popup=body.find_element_by_id("countrypanel-production-tooltip")
                 except:
                     try:
-                        info=browser.find_elements(By.ID,"countrypanel-exchange-tooltip")
-                        time.sleep(1)
-
-                        print(info.text)
-                        print("###########################################")
+                        exchange_popup=body.find_element_by_id("countrypanel-exchange-tooltip")
                     except:
-                        print("linea vuota")
+                        print("no")
+                if(production_popup):
+                    print(production_popup.text)
+                elif(exchange_popup):
+                    print(exchange_popup.text)
+                # popup=body.split("\ni\n")#sbagliato perché ci sono più i
+
+                # print(popup)
+                # if(len(popup)==2):
+                #     popup=popup[1]
+                #     print(popup)
+                print("###########################################")
 
             back=browser.find_elements(By.CLASS_NAME,"left-panel-back-button")[0]
             back.click()
-print("test")
