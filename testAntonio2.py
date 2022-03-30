@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     stati = ['France']
 
-    s=Service("drivers/chromedriver.exe")
+    s=Service("chromedriver.exe")
     browser = webdriver.Chrome(service=s)
 
     browser.get(url_elettricity_map)
