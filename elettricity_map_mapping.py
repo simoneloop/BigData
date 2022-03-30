@@ -11,10 +11,12 @@ import os
 import xlsxwriter
 import pandas as pd
 import re
-# This is a sample Python script.
+from selenium.webdriver.chrome.options import Options
 
-# Press Maiusc+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+
 
 
 
@@ -27,15 +29,16 @@ if __name__ == '__main__':
               'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
               'Ungheria']
 
-    #stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
-   #          'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
-    #          'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-    #          'Hungary']
+    stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
+            'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
+             'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+             'Hungary']
 
-    stati = ['France']
+    # stati = ['France']
 
     s=Service("chromedriver.exe")
     browser = webdriver.Chrome(service=s)
+    # browser = webdriver.Chrome(service=s, chrome_options=chrome_options)
 
     browser.get(url_elettricity_map)
     time.sleep(2)
@@ -67,8 +70,13 @@ if __name__ == '__main__':
                 body = browser.find_elements(By.TAG_NAME, "body")[0]
                 production_popup = None
                 exchange_popup = None
-                production_popup = body.find_element_by_id("countrypanel-production-tooltip")
-                exchange_popup = body.find_element_by_id("countrypanel-exchange-tooltip")
+                try:
+                    production_popup = body.find_element_by_id("countrypanel-production-tooltip")
+                except:
+                    try:
+                        exchange_popup = body.find_element_by_id("countrypanel-exchange-tooltip")
+                    except:
+                        print("no")
                 if (production_popup):
                     print(production_popup.text)
                 elif (exchange_popup):

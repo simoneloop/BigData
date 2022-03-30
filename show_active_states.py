@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
 
 
-    s=Service("C:\\workSpacepy\\bigdataprove\\chromedriver.exe")
+    s=Service("chromedriver.exe")
     browser = webdriver.Chrome(service=s)
 
     browser.get(url_elettricity_map)
