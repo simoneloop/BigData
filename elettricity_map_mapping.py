@@ -18,12 +18,12 @@ chrome_options = Options()
 chrome_options.add_argument("--headless")
 
 def get_production_data(data):
-    print("")
+    print(data)
     # print(data)
     #TODO parser
 
 def get_exchange_data(data):
-    print("")
+    print(data)
     # print(data)
     #TODO parser
 
@@ -40,12 +40,13 @@ if __name__ == '__main__':
               'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
               'Ungheria']
 
+    '''
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
             'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
              'Hungary']
-
-    # stati = ['France']
+    '''
+    stati = ['France']
 
     s=Service("chromedriver.exe")
     browser = webdriver.Chrome(service=s)
