@@ -35,9 +35,13 @@ if __name__ == '__main__':
               'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
               'Hungary']
     '''
-    stati = ['France','Germany','Poland','Romania','Hungary']
-    n=120
-    minuti=0;
+    stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'France',
+              'Germany', 'Ireland', 'Latvia', 'Lithuania', 'Luxembourg', 'Netherlands',
+              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovenia', 'Sweden',
+              'Hungary']
+
+    n=500
+    secondi=0;
     for j in range(0,n):
 
 
@@ -47,9 +51,9 @@ if __name__ == '__main__':
         browser = webdriver.Chrome(service=s, options=chrome_options)
 
         browser.get(url_elettricity_map)
-        time.sleep(1)
+        time.sleep(0.5)
         x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
-        time.sleep(1)
+        time.sleep(0.5)
         x_button.click()
 
 
@@ -63,19 +67,18 @@ if __name__ == '__main__':
 
              if (stato in stati):
                  l = []
-                 l.append(minuti)
+                 l.append(secondi)
                  l.append(stato)
                  zona.click()
-                 time.sleep(1)
+                 time.sleep(0.5)
                  left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0]  # cliccato il paese prendiamo il pannello a sinistra
-                 time.sleep(1)
+                 time.sleep(0.5)
                  body = browser.find_elements(By.TAG_NAME, "body")[0]
-                 time.sleep(1)
+                 time.sleep(0.5)
                  carbon_data = body.find_elements(By.CLASS_NAME, "country-col")
 
                  for cd in carbon_data:
                      l.append(cd.text)
-
                  print(l)
 
                  back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
@@ -83,8 +86,8 @@ if __name__ == '__main__':
                  zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
                  zones = zone_list.find_elements(By.TAG_NAME, "a")
 
-        minuti= minuti + 0.5
-        time.sleep(30)
+        time.sleep(27.5)
+        secondi= secondi + 27.5 + 1 + 31,5
 
 
 
