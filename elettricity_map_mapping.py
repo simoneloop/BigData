@@ -12,19 +12,61 @@ import xlsxwriter
 import pandas as pd
 import re
 from selenium.webdriver.chrome.options import Options
+dataframe=pd.DataFrame(columns=['type','installed','used','total'])
 
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 
+arts=['dal/dalla','il/la']
+
 def get_production_data(data):
-    print(data)
-    # print(data)
+    print("production \n",data)
+    text=data.split('\n')#array 8 elementi
+    print(text)
+    type=None
+    percentage_on_total=None
+    total_eletricity=None
+    for art in arts:
+        if (re.search(art, text[0])):
+            tmp=text[0].split(art)
+            type=tmp[1]
+
+    if(type):
+        type=type.split('.')
+        type = type[0].replace(" ", "")
+        print("type", type)
+    tmp=re.search("[0-9]+['.'][0-9]*|[0-9]+",text[0])
+    if(tmp):
+        percentage_on_total=tmp.group(0)#prendo il risultato trovato
+        print(percentage_on_total)
+    else:
+        tmp=re.search("['?']",text[0])
+        if(tmp):
+            percentage_on_total='nan'
+            print(percentage_on_total)
+    total_eletricity=text[1].split("/ ")[1].replace(")","")
+    print(total_eletricity)
+    # tmp=re.search(total_eletricity,"GW")
+    # if(tmp):
+    #     total_eletricity=total_eletricity.replace("GW","")
+    #     print(total_eletricity)
+    #     total_eletricity=total_eletricity[0]*1000
+    # else:
+    #     tmp=re.search(total_eletricity,"KW")
+    #     if(tmp):
+    #         total_eletricity.split("KW")
+    #         total_eletricity = total_eletricity[0] / 1000
+    #     else:
+    #         total_eletricity.split("MW")
+    #         total_eletricity = total_eletricity[0]
+    #
+    # print("total elettricity",total_eletricity)
     #TODO parser
 
 def get_exchange_data(data):
-    print(data)
-    # print(data)
+    print("exchange \n", data)
+
     #TODO parser
 
 def get_carbon_data(data):
@@ -40,16 +82,17 @@ if __name__ == '__main__':
               'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
               'Ungheria']
 
-    '''
+
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
             'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
              'Hungary']
-    '''
-    stati = ['France']
 
-    s=Service("chromedriver.exe")
-    browser = webdriver.Chrome(service=s)
+    #stati = ['France']
+    service = Service(executable_path=ChromeDriverManager().install())
+
+    #s=Service("chromedriver.exe")
+    browser = webdriver.Chrome(service=service)
     # browser = webdriver.Chrome(service=s,options=chrome_options)
 
     browser.get(url_elettricity_map)
@@ -88,10 +131,10 @@ if __name__ == '__main__':
                 production_popup = None
                 exchange_popup = None
                 try:
-                    production_popup = body.find_element_by_id("countrypanel-production-tooltip")
+                    production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
                 except:
                     try:
-                        exchange_popup = body.find_element_by_id("countrypanel-exchange-tooltip")
+                        exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
                     except:
                         print("no")
                 if (production_popup):
