@@ -12,6 +12,7 @@ import xlsxwriter
 import pandas as pd
 import re
 from selenium.webdriver.chrome.options import Options
+
 dataframe=pd.DataFrame(columns=['type','installed','used','total'])
 
 
@@ -35,33 +36,34 @@ def get_production_data(data):
     if(type):
         type=type.split('.')
         type = type[0].replace(" ", "")
-        print("type", type)
+        print("Tipo di fonte", type)
     tmp=re.search("[0-9]+['.'][0-9]*|[0-9]+",text[0])
     if(tmp):
-        percentage_on_total=tmp.group(0)#prendo il risultato trovato
-        print(percentage_on_total)
+        percentage_on_total= float(tmp.group(0)) #prendo il risultato trovato
+        print(percentage_on_total," % di questa fonte sul totale statale")
     else:
         tmp=re.search("['?']",text[0])
         if(tmp):
             percentage_on_total='nan'
             print(percentage_on_total)
     total_eletricity=text[1].split("/ ")[1].replace(")","")
-    print(total_eletricity)
-    # tmp=re.search(total_eletricity,"GW")
-    # if(tmp):
-    #     total_eletricity=total_eletricity.replace("GW","")
-    #     print(total_eletricity)
-    #     total_eletricity=total_eletricity[0]*1000
-    # else:
-    #     tmp=re.search(total_eletricity,"KW")
-    #     if(tmp):
-    #         total_eletricity.split("KW")
-    #         total_eletricity = total_eletricity[0] / 1000
-    #     else:
-    #         total_eletricity.split("MW")
-    #         total_eletricity = total_eletricity[0]
-    #
-    # print("total elettricity",total_eletricity)
+    #print(total_eletricity)
+
+    tmp = re.search("['G']|['M']|[K]]", total_eletricity)
+    total_eletricity = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_eletricity)
+
+    total_eletricity = float(total_eletricity.group(0))
+    tmp= tmp.group(0)
+
+    #print(total_eletricity)
+    #print(tmp)
+    if(tmp == 'G'):
+         total_eletricity=total_eletricity*1000
+    else:
+        if(tmp == 'K'):
+            total_eletricity = total_eletricity.is_integer()/1000
+
+    print("total elettricity",total_eletricity," MW")
     #TODO parser
 
 def get_exchange_data(data):
