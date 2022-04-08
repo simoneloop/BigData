@@ -28,6 +28,11 @@ def get_production_data(data):
     type=None
     percentage_on_total=None
     total_eletricity=None
+
+    flag_deposit=1;
+    if(re.search('accumulato', text[0])):
+        flag_deposit=-1
+
     for art in arts:
         if (re.search(art, text[0])):
             tmp=text[0].split(art)
@@ -36,46 +41,86 @@ def get_production_data(data):
     if(type):
         type=type.split('.')
         type = type[0].replace(" ", "")
-        print("Tipo di fonte", type)
+
     tmp=re.search("[0-9]+['.'][0-9]*|[0-9]+",text[0])
+
     if(tmp):
         percentage_on_total= float(tmp.group(0)) #prendo il risultato trovato
-        print(percentage_on_total," % di questa fonte sul totale statale")
+        print("                                                            ",percentage_on_total," % di questa fonte sul totale statale")
     else:
-        tmp=re.search("['?']",text[0])
-        if(tmp):
-            percentage_on_total='nan'
-            print(percentage_on_total)
-    total_eletricity=text[1].split("/ ")[1].replace(")","")
-    #print(total_eletricity)
+        percentage_on_total='nan'
 
-    tmp = re.search("['G']|['M']|[K]]", total_eletricity)
+    total_eletricity=text[1].split("/ ")[1].replace(")","")
+    tmp = re.search("[A-Z]+", total_eletricity)
     total_eletricity = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_eletricity)
 
-    total_eletricity = float(total_eletricity.group(0))
-    tmp= tmp.group(0)
+    if (total_eletricity):
 
-    #print(total_eletricity)
-    #print(tmp)
-    if(tmp == 'G'):
-         total_eletricity=total_eletricity*1000
+        tmp = tmp.group(0)
+        total_eletricity = float(total_eletricity.group(0))
+
+        if(tmp == 'GW'):
+            total_eletricity=total_eletricity * 1000000
+        elif (tmp == 'MW'):
+            total_eletricity = total_eletricity * 1000
+        elif (tmp == 'W'):
+            total_eletricity = total_eletricity / 1000
+
+        if(percentage_on_total != 'nan'):
+
+            percentuale = total_eletricity * (percentage_on_total/100) * flag_deposit
+        else:
+            percentuale = 'nan'
+
     else:
-        if(tmp == 'K'):
-            total_eletricity = total_eletricity.is_integer()/1000
+        total_eletricity='nan'
+        percentuale='nan'
 
-    print("total elettricity",total_eletricity," MW")
+
+    installed_capacity = text[4].split("/ ")[1].replace(")", "")
+    tmp = re.search("[A-Z]+", installed_capacity)
+    installed_capacity = re.search("[0-9]+['.'][0-9]*|[0-9]+", installed_capacity)
+
+    if (installed_capacity):
+        tmp = tmp.group(0)
+        installed_capacity = float(installed_capacity.group(0))
+
+        if (tmp == 'GW'):
+            installed_capacity = installed_capacity * 1000000
+        elif (tmp == 'MW'):
+            installed_capacity = installed_capacity * 1000
+
+        elif (tmp == 'W'):
+            installed_capacity = installed_capacity / 1000
+    else:
+        installed_capacity='nan'
+
+
+
+    print("                                                             Tipo di fonte", type)
+
+    print("                                                             Total elettricity", total_eletricity," KW")
+
+    print("                                                             Capacità installata",installed_capacity, "KW")
+
+    print("                                                             Utilizzo di quella installata ", percentuale, " KW")
+
+
     #TODO parser
 
 def get_exchange_data(data):
-    print("exchange \n", data)
+    print()
+    #print("exchange \n", data)
 
     #TODO parser
 
 def get_carbon_data(data):
-    for d in data:
-        print(d.text)
+    print()
+    #for d in data:
+        #print(d.text)
     #TODO parser
 # Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
     url_elettricity_map = "https://app.electricitymap.org/map"
 
