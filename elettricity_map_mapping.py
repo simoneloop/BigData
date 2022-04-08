@@ -51,13 +51,18 @@ def get_production_data(data):
         percentage_on_total='nan'
 
     total_eletricity=text[1].split("/ ")[1].replace(")","")
+
     tmp = re.search("[A-Z]+", total_eletricity)
     total_eletricity = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_eletricity)
 
     if (total_eletricity):
-
         tmp = tmp.group(0)
         total_eletricity = float(total_eletricity.group(0))
+    else:
+        total_eletricity='nan'
+
+
+    if (total_eletricity != 'nan'):
 
         if(tmp == 'GW'):
             total_eletricity=total_eletricity * 1000000
@@ -73,7 +78,6 @@ def get_production_data(data):
             percentuale = 'nan'
 
     else:
-        total_eletricity='nan'
         percentuale='nan'
 
 
@@ -81,10 +85,13 @@ def get_production_data(data):
     tmp = re.search("[A-Z]+", installed_capacity)
     installed_capacity = re.search("[0-9]+['.'][0-9]*|[0-9]+", installed_capacity)
 
-    if (installed_capacity):
+    if(installed_capacity):
         tmp = tmp.group(0)
         installed_capacity = float(installed_capacity.group(0))
+    else:
+        installed_capacity ='nan'
 
+    if (installed_capacity != 'nan'):
         if (tmp == 'GW'):
             installed_capacity = installed_capacity * 1000000
         elif (tmp == 'MW'):
@@ -92,9 +99,6 @@ def get_production_data(data):
 
         elif (tmp == 'W'):
             installed_capacity = installed_capacity / 1000
-    else:
-        installed_capacity='nan'
-
 
 
     print("                                                             Tipo di fonte", type)

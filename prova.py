@@ -20,6 +20,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+
+    if(1):
+        print('sono dentro')
+    else:
+        print('sono fuori')
     url_elettricity_map = "https://app.electricitymap.org/map"
 
     service = Service(executable_path=ChromeDriverManager().install())
