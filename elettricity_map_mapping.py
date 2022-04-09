@@ -27,6 +27,7 @@ def get_production_data(data):
     print(text)
     type=None
     production=None
+    emissions=None
 
     flag_deposit=1;
     if(re.search('accumulato', text[0])):
@@ -83,9 +84,26 @@ def get_production_data(data):
         elif (tmp == 'W'):
             installed_capacity = installed_capacity / 1000
 
+    total_emissions = text[7].split("/ ")[1]
+    total_emissions = total_emissions.split(" ")[0]
 
+    tmp = re.search("[a-z]+", total_emissions)
+    total_emissions = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_emissions)
+
+    if (total_emissions):
+        tmp = tmp.group(0)
+        total_emissions = float(total_emissions.group(0))
+        if(tmp == 't'):
+            total_emissions = total_emissions * 1000
+        percentage_on_total = re.search("[0-9]+['.'][0-9]*|[0-9]+", text[6])
+        if(percentage_on_total):
+            percentage_on_total = float(percentage_on_total.group(0))
+            print("                                                            ", percentage_on_total, " % di inquinamento di questa fonte sul totale statale")
+            emissions= total_emissions * (percentage_on_total / 100)
 
     print("                                                             Capacita' installata Totale", total_eletricity," KW")
+
+    print("                                                             Emissioni totali", total_emissions, " kg CO2 equivalente al minuto")
 
     print("                                                             Tipo di fonte", type)
 
@@ -93,7 +111,7 @@ def get_production_data(data):
 
     print("                                                             Produzione", production, " KW")
 
-
+    print("                                                             Emissioni per questa fonte", emissions, " kg CO2 equivalente al minuto")
     #TODO parser
 
 def get_exchange_data(data):
@@ -112,18 +130,18 @@ def get_carbon_data(data):
 if __name__ == '__main__':
     url_elettricity_map = "https://app.electricitymap.org/map"
 
-    statiold=['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
+    stati=['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
               'Germania', 'Grecia', 'Irlanda', 'Italia', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
               'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
               'Ungheria']
 
-
+    '''
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
             'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
              'Hungary']
-
-    #stati = ['France']
+    '''
+    #stati = ['Francia']
     service = Service(executable_path=ChromeDriverManager().install())
 
     #s=Service("chromedriver.exe")
@@ -194,5 +212,5 @@ if __name__ == '__main__':
 
 
 
-browser.close()
+    browser.close()
 
