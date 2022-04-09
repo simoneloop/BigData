@@ -22,12 +22,11 @@ chrome_options.add_argument("--headless")
 arts=['dal/dalla','il/la']
 
 def get_production_data(data):
-    print("production \n",data)
+    print("Production \n",data)
     text=data.split('\n')#array 8 elementi
     print(text)
     type=None
-    percentage_on_total=None
-    total_eletricity=None
+    production=None
 
     flag_deposit=1;
     if(re.search('accumulato', text[0])):
@@ -42,13 +41,6 @@ def get_production_data(data):
         type=type.split('.')
         type = type[0].replace(" ", "")
 
-    tmp=re.search("[0-9]+['.'][0-9]*|[0-9]+",text[0])
-
-    if(tmp):
-        percentage_on_total= float(tmp.group(0)) #prendo il risultato trovato
-        print("                                                            ",percentage_on_total," % di questa fonte sul totale statale")
-    else:
-        percentage_on_total='nan'
 
     total_eletricity=text[1].split("/ ")[1].replace(")","")
 
@@ -58,11 +50,6 @@ def get_production_data(data):
     if (total_eletricity):
         tmp = tmp.group(0)
         total_eletricity = float(total_eletricity.group(0))
-    else:
-        total_eletricity='nan'
-
-
-    if (total_eletricity != 'nan'):
 
         if(tmp == 'GW'):
             total_eletricity=total_eletricity * 1000000
@@ -71,14 +58,13 @@ def get_production_data(data):
         elif (tmp == 'W'):
             total_eletricity = total_eletricity / 1000
 
-        if(percentage_on_total != 'nan'):
+        percentage_on_total = re.search("[0-9]+['.'][0-9]*|[0-9]+", text[0])
 
-            percentuale = total_eletricity * (percentage_on_total/100) * flag_deposit
-        else:
-            percentuale = 'nan'
+        if(percentage_on_total):
+            percentage_on_total = float(percentage_on_total.group(0))  # prendo il risultato trovato
+            print("                                                            ", percentage_on_total," % di questa fonte sul totale statale")
+            production = total_eletricity * (percentage_on_total/100) * flag_deposit
 
-    else:
-        percentuale='nan'
 
 
     installed_capacity = text[4].split("/ ")[1].replace(")", "")
@@ -88,10 +74,7 @@ def get_production_data(data):
     if(installed_capacity):
         tmp = tmp.group(0)
         installed_capacity = float(installed_capacity.group(0))
-    else:
-        installed_capacity ='nan'
 
-    if (installed_capacity != 'nan'):
         if (tmp == 'GW'):
             installed_capacity = installed_capacity * 1000000
         elif (tmp == 'MW'):
@@ -101,13 +84,14 @@ def get_production_data(data):
             installed_capacity = installed_capacity / 1000
 
 
-    print("                                                             Tipo di fonte", type)
 
-    print("                                                             Total elettricity", total_eletricity," KW")
+    print("                                                             Capacita' installata Totale", total_eletricity," KW")
+
+    print("                                                             Tipo di fonte", type)
 
     print("                                                             Capacità installata",installed_capacity, "KW")
 
-    print("                                                             Utilizzo di quella installata ", percentuale, " KW")
+    print("                                                             Produzione", production, " KW")
 
 
     #TODO parser
@@ -159,10 +143,17 @@ if __name__ == '__main__':
     print('Stati per i quali vogliamo prendere i dati  :',len(stati))
     for i in range (0,len(zones)):
          zona = zones[i]
-         tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ]
+         tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
          stato = tag[len(tag) - 1]    # prendiamo nome_stato
 
+
          if (stato in stati):
+            if (len(tag) == 3):
+                zona_nello_stato = tag[len(tag) - 2]
+                print("Stato = ", stato, "zona_nello_stato = ", zona_nello_stato)
+            else:
+                print("Stato = ", stato)
+
             zona.click()
             time.sleep(2)
             left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0] # cliccato il paese prendiamo il pannello a sinistra
@@ -189,11 +180,13 @@ if __name__ == '__main__':
                     except:
                         print("no")
                 if (production_popup):
+                    print()
                     get_production_data(production_popup.text)
 
                 elif (exchange_popup):
+                    print()
                     get_exchange_data(exchange_popup.text)
-                print("###########################################")
+                print("#############################################################################################################################################")
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
             zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
