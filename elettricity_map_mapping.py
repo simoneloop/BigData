@@ -403,8 +403,8 @@ if __name__ == '__main__':
                         res_export+=(tmp_v)
             tmp['exchange_export'] = res_export
             tmp['exchange_import'] = res_import
-
-            df=df.append(pd.DataFrame(tmp,index=[0]))
+            df=pd.concat([df,pd.DataFrame(tmp,index=[0])],ignore_index=True)
+            # df=df.append(pd.DataFrame(tmp,index=[0],ignore_index=True))
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
             zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
