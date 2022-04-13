@@ -1,5 +1,6 @@
 import requests
 import selenium
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.service import Service
@@ -7,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+from threading import Thread
 import os
 import xlsxwriter
 import pandas as pd
@@ -237,17 +239,17 @@ def get_exchange_data(data):
     # print("                                                             Emissioni per trasporto", emissions,
     #       " kg CO2 equivalente al minuto")
     if(exchange_state):
-        res+=(str(exchange_state))+","
+        res+=(str(exchange_state))+"_"
     else:
-        res+="nan,"
+        res+="nan_"
     if(installed_exchange_capacity):
-        res+=(str(installed_exchange_capacity))+","
+        res+=(str(installed_exchange_capacity))+"_"
     else:
-        res+="nan,"
+        res+="nan_"
     if(exchange):
-        res+=str((exchange))+","
+        res+=str((exchange))+"_"
     else:
-        res+="nan,"
+        res+="nan_"
     if(emissions):
         res+=str((emissions))+";"
     else:
@@ -266,7 +268,7 @@ def get_carbon_data(data):
     #TODO parser
 # Press the green button in the gutter to run the script.
 
-def x():
+def xyz(timestamp, stati):
     '''
     df = pd.DataFrame(
         columns=['timestamp', 'carbon_intensity', 'low_emissions', 'renewable_emissions', 'total_electricity',
@@ -287,12 +289,12 @@ def x():
     '''
 
 
-
+    '''
     stati=['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
               'Germania', 'Grecia', 'Irlanda', 'Italia', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
               'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
               'Ungheria']
-
+    '''
     '''
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
             'Germany', 'Greece', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
@@ -335,6 +337,7 @@ def x():
             else:
                 state_name=stato
 
+            state_name=state_name.replace("/", " ")
             print(state_name)
             path = os.path.join(STATES_DIR, state_name+".xlsx")
             exist=False
@@ -349,11 +352,11 @@ def x():
 
 
             zona.click()
-            time.sleep(2)
+            time.sleep(1.8)
             left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0] # cliccato il paese prendiamo il pannello a sinistra
-            time.sleep(2)
+            time.sleep(1.8)
             body=browser.find_elements(By.TAG_NAME,"body")[0]
-            time.sleep(2)
+            time.sleep(1.8)
             try:
                 carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
             except:
@@ -399,6 +402,7 @@ def x():
                         res_export+=(tmp_v)
             tmp['exchange_export'] = res_export
             tmp['exchange_import'] = res_import
+            tmp['timestamp']=timestamp
             df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
             # df=df.append(pd.DataFrame(tmp,index=[0],ignore_index=True))
             if (not exist):
@@ -420,4 +424,43 @@ def x():
 
 
 if __name__ == '__main__':
-    x()
+
+
+    stati = ['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
+             'Germania', 'Grecia', 'Irlanda', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
+             'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Svezia',
+             'Ungheria','Italia'] # italia 6  danimarca 2 sezioni
+
+    stato = ['Spagna'] #11 sezioni
+
+    nThread=5
+
+    x = int(len(stati)/(nThread-1))+1
+
+    final_list = lambda stati, x: [stati[i:i + x] for i in range(0, len(stati), x)]
+
+    output = final_list(stati, x)
+    output.append(stato)
+
+    print(output)
+    print(output[0])
+    print(output[1])
+    print(output[2])
+    print(output[3])
+    print(output[4])
+
+    timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+    print(timestamp)
+    for i in range(nThread):
+        t = Thread(target=xyz, args=(timestamp,output[i],))
+        t.start()
+
+
+    '''
+    c=1
+    while(c<=10):
+        timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+        print(timestamp)
+        x(timestamp)
+        c+=1
+    '''
