@@ -13,7 +13,8 @@ import pandas as pd
 import re
 from selenium.webdriver.chrome.options import Options
 
-
+chrome_options = Options()
+chrome_options.add_argument("--headless")
 
 ######################## flusso dati
 
@@ -27,8 +28,6 @@ from selenium.webdriver.chrome.options import Options
 #per ogni paese un file excel/csv
 #ogni thread avrà accesso ai vari fogli excel a cui ha accesso per gli stati da cercare
 #il singolo thread, apre il foglio excel, ne legge il contenuto, avvia la ricerca per una nuova riga, concatena la nuova ricerca ai vecchi risultati infine sovrascrive il file excel del paese specifico
-
-
 
 
 dataframe = pd.DataFrame(
@@ -48,12 +47,9 @@ dataframe = pd.DataFrame(
                  'sconosciuto_installed_capacity', 'sconosciuto_production', 'sconosciuto_emissions'
             , 'exchange_export', 'exchange_import'])
 
+url_elettricity_map = "https://app.electricitymap.org/map"
 
-STATES_DIR="D:\BigData\states"
-
-
-chrome_options = Options()
-chrome_options.add_argument("--headless")
+STATES_DIR="..\BigData\states"
 
 arts=['dal/dalla','il/la']
 
@@ -270,8 +266,8 @@ def get_carbon_data(data):
     #TODO parser
 # Press the green button in the gutter to run the script.
 
-if __name__ == '__main__':
-
+def x():
+    '''
     df = pd.DataFrame(
         columns=['timestamp', 'carbon_intensity', 'low_emissions', 'renewable_emissions', 'total_electricity',
                  'total_emissions'
@@ -288,16 +284,14 @@ if __name__ == '__main__':
             , 'petrolio_installed_capacity', 'petrolio_production', 'petrolio_emissions',
                  'sconosciuto_installed_capacity', 'sconosciuto_production', 'sconosciuto_emissions'
             , 'exchange_export', 'exchange_import'])
+    '''
 
 
 
-
-    url_elettricity_map = "https://app.electricitymap.org/map"
-
-    # stati=['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
-    #           'Germania', 'Grecia', 'Irlanda', 'Italia', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
-    #           'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
-    #           'Ungheria']
+    stati=['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
+              'Germania', 'Grecia', 'Irlanda', 'Italia', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
+              'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Spagna', 'Svezia',
+              'Ungheria']
 
     '''
     stati = ['Austria', 'Belgium', 'Bulgaria', 'Cyprus', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -305,12 +299,13 @@ if __name__ == '__main__':
              'Poland', 'Portugal', 'Czechia', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
              'Hungary']
     '''
-    stati = ['Francia','Italia']
+    #stati = ['Francia']
+
     service = Service(executable_path=ChromeDriverManager().install())
 
     #s=Service("chromedriver.exe")
-    browser = webdriver.Chrome(service=service)
-    #browser = webdriver.Chrome(service=service,options=chrome_options)
+    #browser = webdriver.Chrome(service=service)
+    browser = webdriver.Chrome(service=service,options=chrome_options)
 
     browser.get(url_elettricity_map)
     time.sleep(2)
@@ -332,15 +327,15 @@ if __name__ == '__main__':
          index=0
          if (stato in stati):
             tmp = {}
-            df=pd.DataFrame()
+            #df=pd.DataFrame()
             if (len(tag) == 3):
                 zona_nello_stato = tag[len(tag) - 2]
                 state_name+=zona_nello_stato
                 state_name+=" ("+stato+")"
             else:
-
                 state_name=stato
 
+            print(state_name)
             path = os.path.join(STATES_DIR, state_name+".xlsx")
             exist=False
             try:
@@ -348,8 +343,9 @@ if __name__ == '__main__':
                 exist=True
             except:
                 pass
-            finally:
-                writer = pd.ExcelWriter(path, engine="xlsxwriter")
+            #finally:
+               #print()
+               #writer = pd.ExcelWriter(path, engine="xlsxwriter")
 
 
             zona.click()
@@ -403,20 +399,25 @@ if __name__ == '__main__':
                         res_export+=(tmp_v)
             tmp['exchange_export'] = res_export
             tmp['exchange_import'] = res_import
-            df=pd.concat([df,pd.DataFrame(tmp,index=[0])],ignore_index=True)
+            df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
             # df=df.append(pd.DataFrame(tmp,index=[0],ignore_index=True))
+            if (not exist):
+                dataframe_state = dataframe.copy()
+            dataframe_state = pd.concat([dataframe_state, df])
+            dataframe_state.to_excel(path,index=False)
+            #dataframe_state.to_excel(writer,sheet_name=state_name)
+            #writer.save()
+            #writer.close()
+
+
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
             zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
             zones = zone_list.find_elements(By.TAG_NAME, "a")
-            if (not exist):
-                dataframe_state = dataframe.copy()
-            dataframe_state = pd.concat([dataframe_state, df],ignore_index=True)
-            dataframe_state.to_excel(writer,sheet_name=state_name)
-            writer.save()
-            writer.close()
 
 
     browser.close()
 
 
+if __name__ == '__main__':
+    x()
