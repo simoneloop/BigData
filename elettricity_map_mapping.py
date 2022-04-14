@@ -398,6 +398,7 @@ def run(timestamp, stati):
                     back.click()
                     zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
                     zones = zone_list.find_elements(By.TAG_NAME, "a")
+                    break
         except:
             path = os.path.join(STATES_DIR, s + ".xlsx")
             exist = False
@@ -416,7 +417,7 @@ def run(timestamp, stati):
                 dataframe_state.to_excel(path, sheet_name=s, index=False)
             except:
                 dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
-
+            #da sistemare
             back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
             back.click()
             zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
