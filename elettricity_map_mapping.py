@@ -411,7 +411,7 @@ def xyz(timestamp, stati):
             try:
                 dataframe_state.to_excel(path,sheet_name=state_name,index=False)
             except:
-                dataframe_state.to_excel(path, index=False)
+                dataframe_state.to_excel(path,sheet_name=stato,index=False)
             #dataframe_state.to_excel(writer,sheet_name=state_name)
             #writer.save()
             #writer.close()
@@ -452,12 +452,17 @@ if __name__ == '__main__':
     print(output[3])
     print(output[4])
 
-    timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-    print(timestamp)
-    for i in range(nThread):
-        t = Thread(target=xyz, args=(timestamp,output[i],))
-        t.start()
+    c=1
+    while (c <= 10):
+        timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+        print(timestamp)
 
+        for i in range(nThread):
+            t = Thread(target=xyz, args=(timestamp,output[i],))
+            t.start()
+        time.sleep(600)
+        print("fine c = ",c)
+        c += 1
 
     '''
     c=1
