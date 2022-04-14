@@ -268,7 +268,7 @@ def get_carbon_data(data):
     #TODO parser
 # Press the green button in the gutter to run the script.
 
-def xyz(timestamp, stati):
+def run(timestamp, stati):
     '''
     df = pd.DataFrame(
         columns=['timestamp', 'carbon_intensity', 'low_emissions', 'renewable_emissions', 'total_electricity',
@@ -317,110 +317,128 @@ def xyz(timestamp, stati):
 
     zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
     zones=zone_list.find_elements(By.TAG_NAME,"a")
+    for s in stati:
+        for i in range(0, len(zones)):
+            zona = zones[i]
+            tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
+            stato = tag[len(tag) - 1]  # prendiamo nome_stato
+
+            state_name = ''
+            if (len(tag) == 3):
+                zona_nello_stato = tag[len(tag) - 2]
+                state_name += zona_nello_stato
+                state_name += " (" + stato + ")"
+            else:
+                state_name = stato
+            state_name = state_name.replace("/", " ")
+            print(state_name)
+            if (s==state_name):
+
 
     # print('Zone Totali Disponibili :                    ',len(zones))
     # print('Stati per i quali vogliamo prendere i dati  :',len(stati))
-    for i in range (0,len(zones)):
-         zona = zones[i]
-         tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
-         stato = tag[len(tag) - 1]    # prendiamo nome_stato
 
-         state_name=''
-         index=0
-         if (stato in stati):
-            tmp = {}
-            #df=pd.DataFrame()
-            if (len(tag) == 3):
-                zona_nello_stato = tag[len(tag) - 2]
-                state_name+=zona_nello_stato
-                state_name+=" ("+stato+")"
-            else:
-                state_name=stato
+    # for i in range (0,len(zones)):
+    #      zona = zones[i]
+    #      tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
+    #      stato = tag[len(tag) - 1]    # prendiamo nome_stato
+    #
+    #      state_name=''#
+    #     if (stato in stati):
 
-            state_name=state_name.replace("/", " ")
-            print(state_name)
-            path = os.path.join(STATES_DIR, state_name+".xlsx")
-            exist=False
-            try:
-                dataframe_state=pd.read_excel(path)
-                exist=True
-            except:
-                pass
-            #finally:
-               #print()
-               #writer = pd.ExcelWriter(path, engine="xlsxwriter")
+                tmp = {}
+                #df=pd.DataFrame()
+                if (len(tag) == 3):
+                    zona_nello_stato = tag[len(tag) - 2]
+                    state_name+=zona_nello_stato
+                    state_name+=" ("+stato+")"
+                else:
+                    state_name=stato
 
-
-            zona.click()
-            time.sleep(1.8)
-            left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0] # cliccato il paese prendiamo il pannello a sinistra
-            time.sleep(1.8)
-            body=browser.find_elements(By.TAG_NAME,"body")[0]
-            time.sleep(1.8)
-            try:
-                carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
-            except:
-                pass
-            if(carbon_data):
-                carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
-
-                tmp['carbon_intensity'] = carbon_intensity
-                tmp['low_emissions'] = low_emissions
-                tmp['renewable_emissions'] = renewable_emissions
-
-            rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
-            time.sleep(2)
-            action = ActionChains(browser)
-            res_import=""
-            res_export=""
-            for r in rows:
-                action.move_to_element(r).perform()
-                time.sleep(1.5)
-                body = browser.find_elements(By.TAG_NAME, "body")[0]
-                production_popup = None
-                exchange_popup = None
+                state_name=state_name.replace("/", " ")
+                print(state_name)
+                path = os.path.join(STATES_DIR, state_name+".xlsx")
+                exist=False
                 try:
-                    production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
+                    dataframe_state=pd.read_excel(path)
+                    exist=True
                 except:
+                    pass
+                #finally:
+                   #print()
+                   #writer = pd.ExcelWriter(path, engine="xlsxwriter")
+
+
+                zona.click()
+                time.sleep(1.8)
+                left_panel = browser.find_elements(By.CLASS_NAME, "left-panel-zone-details")[0] # cliccato il paese prendiamo il pannello a sinistra
+                time.sleep(1.8)
+                body=browser.find_elements(By.TAG_NAME,"body")[0]
+                time.sleep(1.8)
+                try:
+                    carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
+                except:
+                    pass
+                if(carbon_data):
+                    carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
+
+                    tmp['carbon_intensity'] = carbon_intensity
+                    tmp['low_emissions'] = low_emissions
+                    tmp['renewable_emissions'] = renewable_emissions
+
+                rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
+                time.sleep(2)
+                action = ActionChains(browser)
+                res_import=""
+                res_export=""
+                for r in rows:
+                    action.move_to_element(r).perform()
+                    time.sleep(1.5)
+                    body = browser.find_elements(By.TAG_NAME, "body")[0]
+                    production_popup = None
+                    exchange_popup = None
                     try:
-                        exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
+                        production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
                     except:
-                        pass
-                if (production_popup):
-                    total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
-                    tmp['total_electricity'] = total_eletricity
-                    tmp['total_emissions'] = total_emissions
-                    tmp[type.lower() + '_installed_capacity'] = installed_capacity
-                    tmp[type.lower() + '_production'] = production
-                    tmp[type.lower() + '_emissions'] = emissions
+                        try:
+                            exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
+                        except:
+                            pass
+                    if (production_popup):
+                        total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
+                        tmp['total_electricity'] = total_eletricity
+                        tmp['total_emissions'] = total_emissions
+                        tmp[type.lower() + '_installed_capacity'] = installed_capacity
+                        tmp[type.lower() + '_production'] = production
+                        tmp[type.lower() + '_emissions'] = emissions
 
-                elif (exchange_popup):
-                    tmp_v,flag=get_exchange_data(exchange_popup.text)
-                    if(flag>0):
-                        res_import+=(tmp_v)
-                    else:
-                        res_export+=(tmp_v)
-            tmp['exchange_export'] = res_export
-            tmp['exchange_import'] = res_import
-            tmp['timestamp']=timestamp
-            df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
-            # df=df.append(pd.DataFrame(tmp,index=[0],ignore_index=True))
-            if (not exist):
-                dataframe_state = dataframe.copy()
-            dataframe_state = pd.concat([dataframe_state, df])
-            try:
-                dataframe_state.to_excel(path,sheet_name=state_name,index=False)
-            except:
-                dataframe_state.to_excel(path,sheet_name=stato,index=False)
-            #dataframe_state.to_excel(writer,sheet_name=state_name)
-            #writer.save()
-            #writer.close()
+                    elif (exchange_popup):
+                        tmp_v,flag=get_exchange_data(exchange_popup.text)
+                        if(flag>0):
+                            res_import+=(tmp_v)
+                        else:
+                            res_export+=(tmp_v)
+                tmp['exchange_export'] = res_export
+                tmp['exchange_import'] = res_import
+                tmp['timestamp']=timestamp
+                df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
+                # df=df.append(pd.DataFrame(tmp,index=[0],ignore_index=True))
+                if (not exist):
+                    dataframe_state = dataframe.copy()
+                dataframe_state = pd.concat([dataframe_state, df])
+                try:
+                    dataframe_state.to_excel(path,sheet_name=state_name,index=False)
+                except:
+                    dataframe_state.to_excel(path,sheet_name=stato,index=False)
+                #dataframe_state.to_excel(writer,sheet_name=state_name)
+                #writer.save()
+                #writer.close()
 
 
-            back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
-            back.click()
-            zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
-            zones = zone_list.find_elements(By.TAG_NAME, "a")
+                back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
+                back.click()
+                zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
+                zones = zone_list.find_elements(By.TAG_NAME, "a")
 
 
     browser.close()
@@ -428,30 +446,43 @@ def xyz(timestamp, stati):
 
 if __name__ == '__main__':
 
-
+    '''
     stati = ['Austria', 'Belgio', 'Bulgaria', 'Cipro', 'Croazia', 'Danimarca', 'Estonia', 'Finlandia', 'Francia',
              'Germania', 'Grecia', 'Irlanda', 'Lettonia', 'Lituania', 'Lussemburgo', 'Malta', 'Paesi Bassi',
              'Polonia', 'Portogallo', 'Repubblica Ceca', 'Romania', 'Slovacchia', 'Slovenia', 'Svezia',
              'Ungheria','Italia'] # italia 6  danimarca 2 sezioni
 
     stato = ['Spagna'] #11 sezioni
+    '''
 
-    nThread=5
+    stati = ['El Hierro (Spagna)','Svezia','Francia','Danimarca orientale (Danimarca)','Romania','Spagna','Belgio','Lettonia','Portogallo','Gran Canaria (Spagna)',
+           'Danimarca occidentale (Danimarca)','Ungheria','Formentera (Spagna)','Lussemburgo','Finlandia','Austria','Slovenia','Maiorca (Spagna)','Paesi Bassi','Lituania',
+           'Slovacchia','Croazia','Ibiza (Spagna)','Polonia','Irlanda','Sicilia (Italia)','Bulgaria','Tenerife (Spagna)','Germania','Centronord (Italia)','Cipro',
+           'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
+           'Centrosud (Italia)','Sardegna (Italia)']
 
-    x = int(len(stati)/(nThread-1))+1
+    nThread=6
+
+    x = int(len(stati)/(nThread))+1
 
     final_list = lambda stati, x: [stati[i:i + x] for i in range(0, len(stati), x)]
 
     output = final_list(stati, x)
-    output.append(stato)
+    #output.append(stato)
 
     print(output)
-    print(output[0])
-    print(output[1])
-    print(output[2])
-    print(output[3])
-    print(output[4])
+    print()
+    for out in output:
+        print(out)
 
+    timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+    print(timestamp)
+
+    for i in range(nThread):
+        t = Thread(target=run, args=(timestamp, output[i],))
+        t.start()
+
+    '''
     c=1
     while (c <= 10):
         timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
@@ -463,7 +494,7 @@ if __name__ == '__main__':
         time.sleep(600)
         print("fine c = ",c)
         c += 1
-
+    '''
     '''
     c=1
     while(c<=10):
