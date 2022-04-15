@@ -284,148 +284,154 @@ def run(timestamp, stati):
              'Hungary']
     '''
     #stati = ['Francia']
+    try:
+        service = Service(executable_path=ChromeDriverManager().install())
 
-    service = Service(executable_path=ChromeDriverManager().install())
+        #s=Service("chromedriver.exe")
+        #browser = webdriver.Chrome(service=service)
+        browser = webdriver.Chrome(service=service,options=chrome_options)
 
-    #s=Service("chromedriver.exe")
-    #browser = webdriver.Chrome(service=service)
-    browser = webdriver.Chrome(service=service,options=chrome_options)
+        browser.get(url_elettricity_map)
+        time.sleep(2)
+        x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
+        tent=0
+        while tent<3:
+            tent+=1
+            try:
+                time.sleep(2)
+                x_button.click()
+                break
+            except:
+                browser.get(url_elettricity_map)
+                time.sleep(2)
+                x_button = browser.find_elements(By.CLASS_NAME, "modal-close-button")[0]
 
-    browser.get(url_elettricity_map)
-    time.sleep(2)
-    x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
-    tent=0
-    while tent<3:
-        tent+=1
-        try:
-            time.sleep(2)
-            x_button.click()
-            break
-        except:
-            browser.get(url_elettricity_map)
-            time.sleep(2)
-            x_button = browser.find_elements(By.CLASS_NAME, "modal-close-button")[0]
+        time.sleep(2)
+        zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
+        zones=zone_list.find_elements(By.TAG_NAME,"a")
+        for s in stati:
+            try:
+                for i in range(0, len(zones)):
+                    zona = zones[i]
+                    tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
+                    stato = tag[len(tag) - 1]  # prendiamo nome_stato
 
+                    state_name = ''
+                    if (len(tag) == 3):
+                        zona_nello_stato = tag[len(tag) - 2]
+                        state_name += zona_nello_stato
+                        state_name += " (" + stato + ")"
+                    else:
+                        state_name = stato
+                    state_name = state_name.replace("/", " ")
 
-    zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
-    zones=zone_list.find_elements(By.TAG_NAME,"a")
-    for s in stati:
-        try:
-            for i in range(0, len(zones)):
-                zona = zones[i]
-                tag = zona.text.split("\n")  # 2 elementi [ numero , nome_stato ] o 3 elementi [ numero ,zona_specifica, nome_stato ]
-                stato = tag[len(tag) - 1]  # prendiamo nome_stato
-
-                state_name = ''
-                if (len(tag) == 3):
-                    zona_nello_stato = tag[len(tag) - 2]
-                    state_name += zona_nello_stato
-                    state_name += " (" + stato + ")"
-                else:
-                    state_name = stato
-                state_name = state_name.replace("/", " ")
-
-                if (s==state_name):
-                    print(s)
-                    tmp = {}
-                    path = os.path.join(STATES_DIR, s+".xlsx")
-                    exist=False
-                    try:
-                        dataframe_state=pd.read_excel(path)
-                        exist=True
-                    except:
-                        pass
-
-                    zona.click()
-                    time.sleep(2)
-                    body=browser.find_elements(By.TAG_NAME,"body")[0]
-                    time.sleep(2)
-                    try:
-                        carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
-                    except:
-                        pass
-                    if(carbon_data):
-                        carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
-                        tmp['carbon_intensity'] = carbon_intensity
-                        tmp['low_emissions'] = low_emissions
-                        tmp['renewable_emissions'] = renewable_emissions
-
-                    rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
-                    time.sleep(2)
-                    action = ActionChains(browser)
-                    res_import=""
-                    res_export=""
-                    for r in rows:
-                        action.move_to_element(r).perform()
-                        time.sleep(2)
-                        body = browser.find_elements(By.TAG_NAME, "body")[0]
-                        production_popup = None
-                        exchange_popup = None
+                    if (s==state_name):
+                        print(s)
+                        tmp = {}
+                        path = os.path.join(STATES_DIR, s+".xlsx")
+                        exist=False
                         try:
-                            production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
+                            dataframe_state=pd.read_excel(path)
+                            exist=True
                         except:
+                            pass
+
+                        zona.click()
+                        time.sleep(2)
+                        body=browser.find_elements(By.TAG_NAME,"body")[0]
+                        try:
+                            carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
+                        except:
+                            pass
+                        if(carbon_data):
+                            carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
+                            tmp['carbon_intensity'] = carbon_intensity
+                            tmp['low_emissions'] = low_emissions
+                            tmp['renewable_emissions'] = renewable_emissions
+
+                        rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
+                        time.sleep(2)
+                        action = ActionChains(browser)
+                        res_import=""
+                        res_export=""
+                        for r in rows:
+                            action.move_to_element(r).perform()
+                            time.sleep(2)
+                            body = browser.find_elements(By.TAG_NAME, "body")[0]
+                            production_popup = None
+                            exchange_popup = None
                             try:
-                                exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
+                                production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
                             except:
-                                pass
-                        if (production_popup):
-                            total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
-                            tmp['total_electricity'] = total_eletricity
-                            tmp['total_emissions'] = total_emissions
-                            tmp[type.lower() + '_installed_capacity'] = installed_capacity
-                            tmp[type.lower() + '_production'] = production
-                            tmp[type.lower() + '_emissions'] = emissions
+                                try:
+                                    exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
+                                except:
+                                    pass
+                            if (production_popup):
+                                total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
+                                tmp['total_electricity'] = total_eletricity
+                                tmp['total_emissions'] = total_emissions
+                                tmp[type.lower() + '_installed_capacity'] = installed_capacity
+                                tmp[type.lower() + '_production'] = production
+                                tmp[type.lower() + '_emissions'] = emissions
 
-                        elif (exchange_popup):
-                            tmp_v,flag=get_exchange_data(exchange_popup.text)
-                            if(flag>0):
-                                res_import+=(tmp_v)
-                            else:
-                                res_export+=(tmp_v)
-                    tmp['exchange_export'] = res_export
-                    tmp['exchange_import'] = res_import
-                    tmp['timestamp']=timestamp
-                    df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
-                    if (not exist):
-                        dataframe_state = dataframe.copy()
-                    dataframe_state = pd.concat([dataframe_state, df])
-                    try:
-                        dataframe_state.to_excel(path,sheet_name=s,index=False)
-                    except:
-                        dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
+                            elif (exchange_popup):
+                                tmp_v,flag=get_exchange_data(exchange_popup.text)
+                                if(flag>0):
+                                    res_import+=(tmp_v)
+                                else:
+                                    res_export+=(tmp_v)
+                        tmp['exchange_export'] = res_export
+                        tmp['exchange_import'] = res_import
+                        tmp['timestamp']=timestamp
+                        df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
+                        if (not exist):
+                            dataframe_state = dataframe.copy()
+                        dataframe_state = pd.concat([dataframe_state, df])
+                        try:
+                            dataframe_state.to_excel(path,sheet_name=s,index=False)
+                        except:
+                            dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
+                        back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
+                        back.click()
+                        time.sleep(2)
+                        zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
+                        zones = zone_list.find_elements(By.TAG_NAME, "a")
+                        break
+            except:
+                path = os.path.join(STATES_DIR, s + ".xlsx")
+                exist = False
+                try:
+                    dataframe_state = pd.read_excel(path)
+                    exist = True
+                except:
+                    pass
+                tmp={}
+                tmp['timestamp'] = timestamp
+                df = pd.concat([dataframe.copy(), pd.DataFrame(tmp, index=[0])], ignore_index=True)
+                if (not exist):
+                    dataframe_state = dataframe.copy()
+                dataframe_state = pd.concat([dataframe_state, df])
+                try:
+                    dataframe_state.to_excel(path, sheet_name=s, index=False)
+                except:
+                    dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
+
+                try:
                     back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
                     back.click()
+                    time.sleep(2)
+                finally:
                     zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
                     zones = zone_list.find_elements(By.TAG_NAME, "a")
-                    break
-        except:
-            path = os.path.join(STATES_DIR, s + ".xlsx")
-            exist = False
-            try:
-                dataframe_state = pd.read_excel(path)
-                exist = True
-            except:
-                pass
-            tmp={}
-            tmp['timestamp'] = timestamp
-            df = pd.concat([dataframe.copy(), pd.DataFrame(tmp, index=[0])], ignore_index=True)
-            if (not exist):
-                dataframe_state = dataframe.copy()
-            dataframe_state = pd.concat([dataframe_state, df])
-            try:
-                dataframe_state.to_excel(path, sheet_name=s, index=False)
-            except:
-                dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
-            #da sistemare
-            back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
-            back.click()
-            zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
-            zones = zone_list.find_elements(By.TAG_NAME, "a")
 
-    timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-    print("sono il thread",threading.get_ident(), timestamp)
-    browser.close()
+        timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+        print("sono il thread", threading.get_ident(), timestamp)
+        browser.close()
+    except:
+        print("nessuna connessione o errore non previsto")
+
 
 
 if __name__ == '__main__':
@@ -445,19 +451,16 @@ if __name__ == '__main__':
            'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
            'Centrosud (Italia)','Sardegna (Italia)']
 
-    nThread=6
+    nThread=8
 
-    x = int(len(stati)/(nThread))+1
+    x = int(len(stati)/(nThread))
 
     final_list = lambda stati, x: [stati[i:i + x] for i in range(0, len(stati), x)]
 
     output = final_list(stati, x)
-    #output.append(stato)
-
-    # print(output)
     # print()
-    # for out in output:
-    #     print(out)
+    for out in output:
+        print(len(out),"  -->",print(out))
 
     # timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
     # print(timestamp)
