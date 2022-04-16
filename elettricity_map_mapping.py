@@ -18,8 +18,6 @@ from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--remote-debugging-port=22")
 
 ######################## flusso dati
 
@@ -285,7 +283,7 @@ def run(timestamp, stati):
     '''
     #stati = ['Francia']
     try:
-        service = Service(executable_path="./chromedriver")
+        service = Service(executable_path=ChromeDriverManager().install())
 
         #s=Service("chromedriver.exe")
         #browser = webdriver.Chrome(service=service)
