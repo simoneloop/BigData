@@ -50,7 +50,7 @@ dataframe = pd.DataFrame(
                  'sconosciuto_installed_capacity', 'sconosciuto_production', 'sconosciuto_emissions'
             , 'exchange_export', 'exchange_import'])
 
-url_elettricity_map = "https://app.electricitymap.org/map"
+url_elettricity_map = "https://app.electricitymap.org/map?lang=it"
 
 STATES_DIR="../BigData/states"
 
