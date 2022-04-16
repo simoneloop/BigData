@@ -11,7 +11,6 @@ import time
 from threading import Thread
 import threading
 import os
-import xlsxwriter
 import pandas as pd
 import re
 
@@ -429,7 +428,8 @@ def run(timestamp, stati):
         timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
         print("sono il thread", threading.get_ident(), timestamp)
         browser.close()
-    except:
+    except Exception as e:
+        print(e)
         print("nessuna connessione o errore non previsto")
 
 
@@ -451,7 +451,7 @@ if __name__ == '__main__':
            'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
            'Centrosud (Italia)','Sardegna (Italia)']
 
-    nThread=8
+    nThread=1
 
     x = int(len(stati)/(nThread))
 
