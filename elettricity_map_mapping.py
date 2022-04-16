@@ -380,6 +380,7 @@ def run(timestamp, stati):
                                 total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
                                 tmp['total_electricity'] = total_eletricity
                                 tmp['total_emissions'] = total_emissions
+                                print("qua tmp",tmp)
                                 tmp[type.lower() + '_installed_capacity'] = installed_capacity
                                 tmp[type.lower() + '_production'] = production
                                 tmp[type.lower() + '_emissions'] = emissions
