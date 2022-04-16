@@ -384,6 +384,8 @@ def run(timestamp, stati):
                                 tmp[type.lower() + '_installed_capacity'] = installed_capacity
                                 tmp[type.lower() + '_production'] = production
                                 tmp[type.lower() + '_emissions'] = emissions
+                                print("qua tmp",tmp)
+                                print(type)
 
                             elif (exchange_popup):
                                 tmp_v,flag=get_exchange_data(exchange_popup.text)
