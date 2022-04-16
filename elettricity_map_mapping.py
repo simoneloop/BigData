@@ -301,6 +301,7 @@ def run(timestamp, stati):
                 x_button.click()
                 break
             except Exception as e:
+                print("1")
                 print(e)
                 browser.get(url_elettricity_map)
                 time.sleep(2)
@@ -334,6 +335,7 @@ def run(timestamp, stati):
                             dataframe_state=pd.read_excel(path)
                             exist=True
                         except Exception as e:
+                            print("2")
                             print(e)
                             pass
 
@@ -343,6 +345,7 @@ def run(timestamp, stati):
                         try:
                             carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
                         except Exception as e:
+                            print("3")
                             print(e)
                             pass
                         if(carbon_data):
@@ -365,10 +368,12 @@ def run(timestamp, stati):
                             try:
                                 production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
                             except Exception as e:
+                                print("4")
                                 print(e)
                                 try:
                                     exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
                                 except Exception as e:
+                                    print("5")
                                     print(e)
                                     pass
                             if (production_popup):
@@ -395,6 +400,7 @@ def run(timestamp, stati):
                         try:
                             dataframe_state.to_excel(path,sheet_name=s,index=False)
                         except Exception as e:
+                            print("6")
                             print(e)
                             dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
@@ -405,6 +411,7 @@ def run(timestamp, stati):
                         zones = zone_list.find_elements(By.TAG_NAME, "a")
                         break
             except Exception as e:
+                print("7")
                 print(e)
                 path = os.path.join(STATES_DIR, s + ".xlsx")
                 exist = False
@@ -412,6 +419,7 @@ def run(timestamp, stati):
                     dataframe_state = pd.read_excel(path)
                     exist = True
                 except Exception as e:
+                    print("8")
                     print(e)
                     pass
                 tmp={}
@@ -423,6 +431,7 @@ def run(timestamp, stati):
                 try:
                     dataframe_state.to_excel(path, sheet_name=s, index=False)
                 except Exception as e:
+                    print("9")
                     print(e)
                     dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
 
@@ -438,6 +447,7 @@ def run(timestamp, stati):
         print("sono il thread", threading.get_ident(), timestamp)
         browser.close()
     except Exception as e:
+        print("10")
         print(e)
         print("nessuna connessione o errore non previsto")
 
