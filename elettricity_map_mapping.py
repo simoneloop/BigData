@@ -52,7 +52,7 @@ dataframe = pd.DataFrame(
 
 url_elettricity_map = "https://app.electricitymap.org/map"
 
-STATES_DIR="..\BigData\states"
+STATES_DIR="../BigData/states"
 
 arts=['dal/dalla','il/la']
 
