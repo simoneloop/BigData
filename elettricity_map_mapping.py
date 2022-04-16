@@ -332,7 +332,6 @@ def run(timestamp, stati):
                             dataframe_state=pd.read_excel(path)
                             exist=True
                         except Exception as e:
-
                             pass
 
                         zona.click()
@@ -367,19 +366,15 @@ def run(timestamp, stati):
                                 try:
                                     exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
                                 except Exception as e:
-                                    print("5")
-                                    print(e)
                                     pass
                             if (production_popup):
                                 total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
                                 tmp['total_electricity'] = total_eletricity
                                 tmp['total_emissions'] = total_emissions
-                                print("qua tmp",tmp)
+
                                 tmp[type.lower() + '_installed_capacity'] = installed_capacity
                                 tmp[type.lower() + '_production'] = production
                                 tmp[type.lower() + '_emissions'] = emissions
-                                print("qua tmp",tmp)
-                                print(type)
 
                             elif (exchange_popup):
                                 tmp_v,flag=get_exchange_data(exchange_popup.text)
@@ -397,7 +392,6 @@ def run(timestamp, stati):
                         try:
                             dataframe_state.to_excel(path,sheet_name=s,index=False)
                         except Exception as e:
-
                             dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
                         back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
@@ -414,7 +408,6 @@ def run(timestamp, stati):
                     dataframe_state = pd.read_excel(path)
                     exist = True
                 except Exception as e:
-
                     pass
                 tmp={}
                 tmp['timestamp'] = timestamp
@@ -425,7 +418,6 @@ def run(timestamp, stati):
                 try:
                     dataframe_state.to_excel(path, sheet_name=s, index=False)
                 except Exception as e:
-
                     dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
 
                 try:
@@ -440,7 +432,7 @@ def run(timestamp, stati):
         print("sono il thread", threading.get_ident(), timestamp)
         browser.close()
     except Exception as e:
-
+        print(e)
         print("nessuna connessione o errore non previsto")
 
 
@@ -462,7 +454,7 @@ if __name__ == '__main__':
            'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
            'Centrosud (Italia)','Sardegna (Italia)']
 
-    nThread=1
+    nThread=2
 
 
     x = int(len(stati)/(nThread))
