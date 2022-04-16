@@ -7,7 +7,6 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
-import xlsxwriter
 import pandas as pd
 import re
 from webdriver_manager.chrome import ChromeDriverManager
