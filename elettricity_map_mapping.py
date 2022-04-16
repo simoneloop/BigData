@@ -300,7 +300,8 @@ def run(timestamp, stati):
                 time.sleep(2)
                 x_button.click()
                 break
-            except:
+            except Exception as e:
+                print(e)
                 browser.get(url_elettricity_map)
                 time.sleep(2)
                 x_button = browser.find_elements(By.CLASS_NAME, "modal-close-button")[0]
@@ -332,7 +333,8 @@ def run(timestamp, stati):
                         try:
                             dataframe_state=pd.read_excel(path)
                             exist=True
-                        except:
+                        except Exception as e:
+                            print(e)
                             pass
 
                         zona.click()
@@ -340,7 +342,8 @@ def run(timestamp, stati):
                         body=browser.find_elements(By.TAG_NAME,"body")[0]
                         try:
                             carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
-                        except:
+                        except Exception as e:
+                            print(e)
                             pass
                         if(carbon_data):
                             carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
@@ -361,10 +364,12 @@ def run(timestamp, stati):
                             exchange_popup = None
                             try:
                                 production_popup = body.find_element(By.ID,"countrypanel-production-tooltip")
-                            except:
+                            except Exception as e:
+                                print(e)
                                 try:
                                     exchange_popup = body.find_element(By.ID,"countrypanel-exchange-tooltip")
-                                except:
+                                except Exception as e:
+                                    print(e)
                                     pass
                             if (production_popup):
                                 total_eletricity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
@@ -389,7 +394,8 @@ def run(timestamp, stati):
                         dataframe_state = pd.concat([dataframe_state, df])
                         try:
                             dataframe_state.to_excel(path,sheet_name=s,index=False)
-                        except:
+                        except Exception as e:
+                            print(e)
                             dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
                         back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
@@ -398,13 +404,15 @@ def run(timestamp, stati):
                         zone_list = browser.find_elements(By.CLASS_NAME, "zone-list")[0]
                         zones = zone_list.find_elements(By.TAG_NAME, "a")
                         break
-            except:
+            except Exception as e:
+                print(e)
                 path = os.path.join(STATES_DIR, s + ".xlsx")
                 exist = False
                 try:
                     dataframe_state = pd.read_excel(path)
                     exist = True
-                except:
+                except Exception as e:
+                    print(e)
                     pass
                 tmp={}
                 tmp['timestamp'] = timestamp
@@ -414,7 +422,8 @@ def run(timestamp, stati):
                 dataframe_state = pd.concat([dataframe_state, df])
                 try:
                     dataframe_state.to_excel(path, sheet_name=s, index=False)
-                except:
+                except Exception as e:
+                    print(e)
                     dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
 
                 try:
