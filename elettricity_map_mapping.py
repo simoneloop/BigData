@@ -285,7 +285,7 @@ def run(timestamp, stati):
     '''
     #stati = ['Francia']
     try:
-        service = Service(executable_path=ChromeDriverManager().install())
+        service = Service(executable_path="./chromedriver")
 
         #s=Service("chromedriver.exe")
         #browser = webdriver.Chrome(service=service)
