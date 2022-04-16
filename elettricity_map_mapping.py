@@ -19,6 +19,7 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sendbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
 
 ######################## flusso dati
