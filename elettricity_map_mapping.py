@@ -62,7 +62,7 @@ def get_production_data(data):
     type=None
     production=None
     emissions=None
-
+    print("testo",text)
     flag_deposit=1;
     if(re.search('accumulato', text[0])):
         flag_deposit=-1
