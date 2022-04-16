@@ -16,10 +16,10 @@ import re
 
 from selenium.webdriver.chrome.options import Options
 
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--no-sendbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+#chrome_options = Options()
+#chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--no-sendbox")
+#chrome_options.add_argument("--disable-dev-shm-usage")
 
 
 ######################## flusso dati
@@ -286,11 +286,12 @@ def run(timestamp, stati):
     '''
     #stati = ['Francia']
     try:
-        service = Service(executable_path=ChromeDriverManager().install())
+        service = Service(executable_path="./chromedriver")
+
 
         #s=Service("chromedriver.exe")
         #browser = webdriver.Chrome(service=service)
-        browser = webdriver.Chrome(service=service,options=chrome_options)
+        browser = webdriver.Chrome(service=service)
 
         browser.get(url_elettricity_map)
         time.sleep(2)
