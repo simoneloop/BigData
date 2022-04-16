@@ -453,6 +453,7 @@ if __name__ == '__main__':
 
     nThread=1
 
+
     x = int(len(stati)/(nThread))
 
     final_list = lambda stati, x: [stati[i:i + x] for i in range(0, len(stati), x)]
