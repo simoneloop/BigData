@@ -5,7 +5,7 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from threading import Thread
@@ -14,12 +14,11 @@ import os
 import pandas as pd
 import re
 
-from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument('--no-sandbox')
-#chrome_options.add_argument("--remote-debugging-port=22")
+
 
 
 
@@ -393,6 +392,9 @@ def run(timestamp, stati):
                         tmp['exchange_export'] = res_export
                         tmp['exchange_import'] = res_import
                         tmp['timestamp']=timestamp
+                        print(tmp)
+                        print("ciao6")
+                        print("dovrebbeSalvare")
                         df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
                         if (not exist):
                             dataframe_state = dataframe.copy()
