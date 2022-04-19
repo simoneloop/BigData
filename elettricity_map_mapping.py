@@ -539,7 +539,7 @@ if __name__ == '__main__':
             t = Thread(target=run, args=(timestamp,output[i],))
             t.start()
         time.sleep(600)
-        if c%6==0:
+        if c%1==0:
             try:
                 print("Salvataggio nel Drive")
                 controller()
