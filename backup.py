@@ -9,7 +9,6 @@ from datetime import datetime
 def google_auth():
     gauth = GoogleAuth()
     # use local default browser for authentication
-    #auth_url=gauth.GetAuthUrl()
 
     gauth.LocalWebserverAuth()
     drive = GoogleDrive(gauth)
