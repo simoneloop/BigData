@@ -10,3 +10,7 @@ sudo dpkg -i google-chrome-stable_current_amd64.deb
 
 sudo apt install python3-pip
 
+pip install selenium
+pip install pandas
+pip install webdriver-manager
+
