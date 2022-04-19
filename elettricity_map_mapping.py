@@ -292,9 +292,11 @@ def run(timestamp, stati):
 
         #s=Service("chromedriver.exe")
         #browser = webdriver.Chrome(service=service)
+        print("ciao0")
         browser = webdriver.Chrome(service=service,options=chrome_options)
-
+        print("ciao1")
         browser.get(url_elettricity_map)
+        print("ciao2")
         time.sleep(2)
         x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
         tent=0
@@ -459,7 +461,7 @@ if __name__ == '__main__':
            'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
            'Centrosud (Italia)','Sardegna (Italia)']
 
-    nThread=2
+    nThread=8
 
 
     x = int(len(stati)/(nThread))
@@ -469,7 +471,8 @@ if __name__ == '__main__':
     output = final_list(stati, x)
     # print()
     for out in output:
-        print(len(out),"  -->",print(out))
+        print(len(out))
+        print(out)
 
     # timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
     # print(timestamp)
