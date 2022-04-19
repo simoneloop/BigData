@@ -18,7 +18,7 @@ from selenium.webdriver.chrome.options import Options
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
-#chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--no-sandbox')
 #chrome_options.add_argument("--remote-debugging-port=22")
 
 
@@ -298,6 +298,7 @@ def run(timestamp, stati):
         print("ciao2")
         time.sleep(2)
         x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
+        print("ciao3")
         tent=0
         while tent<3:
             tent+=1
@@ -309,7 +310,7 @@ def run(timestamp, stati):
                 browser.get(url_elettricity_map)
                 time.sleep(2)
                 x_button = browser.find_elements(By.CLASS_NAME, "modal-close-button")[0]
-
+        print("ciao4")
         time.sleep(2)
         zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
         zones=zone_list.find_elements(By.TAG_NAME,"a")
@@ -353,7 +354,8 @@ def run(timestamp, stati):
                             tmp['carbon_intensity'] = carbon_intensity
                             tmp['low_emissions'] = low_emissions
                             tmp['renewable_emissions'] = renewable_emissions
-
+                        print(tmp)
+                        print("ciao5")
                         rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
                         time.sleep(2)
                         action = ActionChains(browser)
