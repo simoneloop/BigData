@@ -9,7 +9,7 @@ client_config:
 
 save_credentials: True
 save_credentials_backend: file
-save_credentials_file: C:\workSpacepy\BigData\credentials.json
+save_credentials_file: credentials.json
 
 
 
