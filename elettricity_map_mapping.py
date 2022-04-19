@@ -12,6 +12,7 @@ import os
 import pandas as pd
 import re
 
+from BigData.backup import controller
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -288,14 +289,12 @@ def run(timestamp, stati):
 
         #s=Service("chromedriver.exe")
         #browser = webdriver.Chrome(service=service)
-        print("ciao0")
         browser = webdriver.Chrome(service=service,options=chrome_options)
-        print("ciao1")
         browser.get(url_elettricity_map)
-        print("ciao2")
+
         time.sleep(2)
         x_button=browser.find_elements(By.CLASS_NAME,"modal-close-button")[0]
-        print("ciao3")
+
         tent=0
         while tent<3:
             tent+=1
@@ -307,7 +306,7 @@ def run(timestamp, stati):
                 browser.get(url_elettricity_map)
                 time.sleep(2)
                 x_button = browser.find_elements(By.CLASS_NAME, "modal-close-button")[0]
-        print("ciao4")
+
         time.sleep(2)
         zone_list=browser.find_elements(By.CLASS_NAME,"zone-list")[0]
         zones=zone_list.find_elements(By.TAG_NAME,"a")
@@ -351,8 +350,7 @@ def run(timestamp, stati):
                             tmp['carbon_intensity'] = carbon_intensity
                             tmp['low_emissions'] = low_emissions
                             tmp['renewable_emissions'] = renewable_emissions
-                        print(tmp)
-                        print("ciao5")
+
                         rows = browser.find_elements(By.CLASS_NAME, "row") #prendiamo tutte le righe ognuna delle quali è una fonte energetica o scambio
                         time.sleep(2)
                         action = ActionChains(browser)
@@ -390,19 +388,15 @@ def run(timestamp, stati):
                         tmp['exchange_export'] = res_export
                         tmp['exchange_import'] = res_import
                         tmp['timestamp']=timestamp
-                        print(tmp)
-                        print("ciao6")
-                        print("dovrebbeSalvare")
+
                         df=pd.concat([dataframe.copy(),pd.DataFrame(tmp,index=[0])],ignore_index=True)
                         if (not exist):
                             dataframe_state = dataframe.copy()
                         dataframe_state = pd.concat([dataframe_state, df])
                         try:
-                            print("123")
                             dataframe_state.to_excel(path,sheet_name=s,index=False)
-                            print("456")
+
                         except Exception as e:
-                            print("789")
                             dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
                         back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
@@ -496,7 +490,7 @@ if __name__ == '__main__':
 
 
     c=1
-    while (c <= 10):
+    while (c <= 4320):
         timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
         print(timestamp)
 
@@ -504,13 +498,14 @@ if __name__ == '__main__':
             t = Thread(target=run, args=(timestamp,output[i],))
             t.start()
         time.sleep(600)
+        if c%6==0:
+            try:
+                print("Salvataggio nel Drive")
+                controller()
+            except:
+                print("non sono riuscito a salvare")
+
         print("fine c = ",c)
         c += 1
 
-    # c=1
-    # while(c<=10):
-    #     timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-    #     print(timestamp)
-    #     x(timestamp)
-    #     c+=1
 

@@ -51,8 +51,5 @@ def controller():
 
 if __name__ == '__main__':
 
-
-    #installa = "pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib"
-
     controller()
 
