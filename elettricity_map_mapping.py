@@ -400,8 +400,11 @@ def run(timestamp, stati):
                             dataframe_state = dataframe.copy()
                         dataframe_state = pd.concat([dataframe_state, df])
                         try:
+                            print("123")
                             dataframe_state.to_excel(path,sheet_name=s,index=False)
+                            print("456")
                         except Exception as e:
+                            print("789")
                             dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
 
                         back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
