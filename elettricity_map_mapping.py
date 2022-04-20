@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from threading import Thread
-import threading
 import os
 import pandas as pd
 import re
@@ -52,10 +51,9 @@ def controller():
     now = datetime.now()
     # new backup name
     file_name = "backup " + now.strftime('%H-%M %d-%m-%Y').replace('/', '-')
-    print(file_name)
+    #print(file_name)
     # if zip creation fails then abort execution
     if create_zip(path, file_name):
-        print()
         # start API authentication
         auth, drive = google_auth()
         # start file upload
@@ -368,7 +366,7 @@ def run(timestamp, stati):
                     state_name = state_name.replace("/", " ")
 
                     if (s==state_name):
-                        print(s)
+                        #print(s)
                         tmp = {}
                         path = os.path.join(STATES_DIR, s+".xlsx")
                         exist=False
@@ -384,8 +382,8 @@ def run(timestamp, stati):
                         try:
                             carbon_data=body.find_elements(By.CLASS_NAME,"country-col")
                         except Exception as e:
-
                             pass
+
                         if(carbon_data):
                             carbon_intensity,low_emissions,renewable_emissions=get_carbon_data(carbon_data)
                             tmp['carbon_intensity'] = carbon_intensity
@@ -435,10 +433,15 @@ def run(timestamp, stati):
                             dataframe_state = dataframe.copy()
                         dataframe_state = pd.concat([dataframe_state, df])
                         try:
-                            dataframe_state.to_excel(path,sheet_name=s,index=False)
+                            if(len(s)<=30):
+                                dataframe_state.to_excel(path,sheet_name=s,index=False)
+                            else:
+                                s1 = s.split(" ")[0]
+                                dataframe_state.to_excel(path, sheet_name=s1, index=False)
 
                         except Exception as e:
-                            dataframe_state.to_excel(path,sheet_name=s.split(" ")[0],index=False)
+                            pass
+                            #print(e)
 
                         back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
                         back.click()
@@ -462,9 +465,15 @@ def run(timestamp, stati):
                     dataframe_state = dataframe.copy()
                 dataframe_state = pd.concat([dataframe_state, df])
                 try:
-                    dataframe_state.to_excel(path, sheet_name=s, index=False)
+                    if (len(s) <= 30):
+                        dataframe_state.to_excel(path, sheet_name=s, index=False)
+                    else:
+                        s1=s.split(" ")[0]
+                        dataframe_state.to_excel(path, sheet_name=s1, index=False)
+
                 except Exception as e:
-                    dataframe_state.to_excel(path, sheet_name=s.split(" ")[0], index=False)
+                    pass
+                    #print(e)
 
                 try:
                     back = browser.find_elements(By.CLASS_NAME, "left-panel-back-button")[0]
@@ -475,11 +484,12 @@ def run(timestamp, stati):
                     zones = zone_list.find_elements(By.TAG_NAME, "a")
 
         timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-        print("sono il thread", threading.get_ident(), timestamp)
+        #print("sono il thread", threading.get_ident(), timestamp)
         browser.close()
     except Exception as e:
-        print(e)
-        print("nessuna connessione o errore non previsto")
+        pass
+        #print(e)
+        #print("nessuna connessione o errore non previsto")
 
 
 
@@ -502,7 +512,7 @@ if __name__ == '__main__':
 
     nThread=8
 
-
+    print("Numero di Thread = ",nThread)
     x = int(len(stati)/(nThread))
 
     final_list = lambda stati, x: [stati[i:i + x] for i in range(0, len(stati), x)]
@@ -533,20 +543,21 @@ if __name__ == '__main__':
     c=1
     while (c <= 4320):
         timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-        print(timestamp)
+        #print(timestamp)
 
         for i in range(nThread):
             t = Thread(target=run, args=(timestamp,output[i],))
             t.start()
         time.sleep(600)
-        if c%1==0:
+        if c%36==0:
             try:
-                print("Salvataggio nel Drive")
+                #print("Salvataggio nel Drive")
                 controller()
             except:
-                print("non sono riuscito a salvare")
+                pass
+                #print("non sono riuscito a salvare")
 
-        print("fine c = ",c)
+        #print("fine c = ",c)
         c += 1
 
 
