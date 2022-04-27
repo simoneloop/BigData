@@ -75,7 +75,7 @@ def controller():
 
 
 dataframe = pd.DataFrame(
-        columns=['timestamp', 'carbon_intensity', 'low_emissions', 'renewable_emissions', 'total_capacity',
+        columns=['timestamp', 'carbon_intensity', 'low_emissions', 'renewable_emissions', 'total_production',
                  'total_emissions'
             , 'nucleare_installed_capacity', 'nucleare_production', 'nucleare_emissions',
                  'geotermico_installed_capacity', 'geotermico_production', 'geotermico_emissions'
@@ -117,28 +117,28 @@ def get_production_data(data):
         type = type[0].replace(" ", "")
 
 
-    total_capacity=text[1].split("/ ")[1].replace(")","")
+    total_production=text[1].split("/ ")[1].replace(")","")
 
-    tmp = re.search("[A-Z]+", total_capacity)
-    total_capacity = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_capacity)
+    tmp = re.search("[A-Z]+", total_production)
+    total_production = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_production)
 
-    if (total_capacity):
+    if (total_production):
         tmp = tmp.group(0)
-        total_capacity = float(total_capacity.group(0))
+        total_production = float(total_production.group(0))
 
         if(tmp == 'GW'):
-            total_capacity=total_capacity * 1000000
+            total_production=total_production * 1000000
         elif (tmp == 'MW'):
-            total_capacity = total_capacity * 1000
+            total_production = total_production * 1000
         elif (tmp == 'W'):
-            total_capacity = total_capacity / 1000
+            total_production = total_production / 1000
 
         percentage_on_total = re.search("[0-9]+['.'][0-9]*|[0-9]+", text[0])
 
         if(percentage_on_total):
             percentage_on_total = float(percentage_on_total.group(0))  # prendo il risultato trovato
             # print("                                                            ", percentage_on_total," % di questa fonte sul totale statale")
-            production = total_capacity * (percentage_on_total/100) * flag_deposit
+            production = total_production * (percentage_on_total/100) * flag_deposit
             production=round(production,2)
 
 
@@ -177,7 +177,7 @@ def get_production_data(data):
             emissions= total_emissions * (percentage_on_total / 100)
             emissions=round(emissions,2)
 
-    # print("                                                             Capacita' installata Totale", total_capacity," KW")
+    # print("                                                             Capacita' installata Totale", total_production," KW")
     #
     # print("                                                             Emissioni totali", total_emissions, " kg CO2 equivalente al minuto")
     #
@@ -188,7 +188,7 @@ def get_production_data(data):
     # print("                                                             Produzione", production, " KW")
     #
     # print("                                                             Emissioni per questa fonte", emissions, " kg CO2 equivalente al minuto")
-    return total_capacity,total_emissions,type,installed_capacity,production,emissions
+    return total_production,total_emissions,type,installed_capacity,production,emissions
     #TODO parser
 
 def get_exchange_data(data):
@@ -206,20 +206,20 @@ def get_exchange_data(data):
         exchange_state = text[0].split("da")[1]
 
 
-    total_capacity = text[1].split("/ ")[1].replace(")", "")
-    tmp = re.search("[A-Z]+", total_capacity)
-    total_capacity = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_capacity)
+    total_production = text[1].split("/ ")[1].replace(")", "")
+    tmp = re.search("[A-Z]+", total_production)
+    total_production = re.search("[0-9]+['.'][0-9]*|[0-9]+", total_production)
 
-    if (total_capacity):
+    if (total_production):
         tmp = tmp.group(0)
-        total_capacity = float(total_capacity.group(0))
+        total_production = float(total_production.group(0))
 
         if (tmp == 'GW'):
-            total_capacity = total_capacity * 1000000
+            total_production = total_production * 1000000
         elif (tmp == 'MW'):
-            total_capacity = total_capacity * 1000
+            total_production = total_production * 1000
         elif (tmp == 'W'):
-            total_capacity = total_capacity / 1000
+            total_production = total_production / 1000
 
         percentage_on_total = re.search("[0-9]+['.'][0-9]*|[0-9]+", text[0])
 
@@ -227,7 +227,7 @@ def get_exchange_data(data):
             percentage_on_total = float(percentage_on_total.group(0))  # prendo il risultato trovato
             # print("                                                            ", percentage_on_total,
             #       " % di questa fonte sul totale statale")
-            exchange = total_capacity * (percentage_on_total / 100) * flag_deposit
+            exchange = total_production * (percentage_on_total / 100) * flag_deposit
             exchange = round(exchange, 2)
 
     # print("stato scambio",exchange_state)
@@ -267,7 +267,7 @@ def get_exchange_data(data):
             emissions = total_exchange_emissions * (percentage_on_total / 100)
             emissions = round(emissions, 2)
     #
-    # print("                                                             Capacita' installata Totale", total_capacity,
+    # print("                                                             Capacita' installata Totale", total_production,
     #       " KW")
     #
     # print("                                                             Emissioni  totali", total_exchange_emissions,
@@ -410,8 +410,8 @@ def run(timestamp, stati):
                                 except Exception as e:
                                     pass
                             if (production_popup):
-                                total_capacity,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
-                                tmp['total_capacity'] = total_capacity
+                                total_production,total_emissions,type,installed_capacity,production,emissions=get_production_data(production_popup.text)
+                                tmp['total_production'] = total_production
                                 tmp['total_emissions'] = total_emissions
 
                                 tmp[type.lower() + '_installed_capacity'] = installed_capacity
@@ -503,12 +503,22 @@ if __name__ == '__main__':
 
     stato = ['Spagna'] #11 sezioni
     '''
-
-    stati = ['El Hierro (Spagna)','Svezia','Francia','Danimarca orientale (Danimarca)','Romania','Spagna','Belgio','Lettonia','Portogallo','Gran Canaria (Spagna)',
+    '''
+    stati = ['Gran Bretagna','Isole Shetland (Gran Bretagna)','El Hierro (Spagna)','Svezia','Francia','Danimarca orientale (Danimarca)','Romania','Spagna','Belgio','Lettonia','Portogallo','Gran Canaria (Spagna)',
            'Danimarca occidentale (Danimarca)','Ungheria','Formentera (Spagna)','Lussemburgo','Finlandia','Austria','Slovenia','Maiorca (Spagna)','Paesi Bassi','Lituania',
            'Slovacchia','Croazia','Ibiza (Spagna)','Polonia','Irlanda','Sicilia (Italia)','Bulgaria','Tenerife (Spagna)','Germania','Centronord (Italia)','Cipro',
            'Minorca (Spagna)','Settentrione (Italia)','Estonia','Fuerteventura Lanzarote (Spagna)','La Palma (Spagna)','Meridione (Italia)','La Gomera (Spagna)',
            'Centrosud (Italia)','Sardegna (Italia)']
+    '''
+
+    stati = ['El Hierro (Spagna)', 'Svezia', 'Francia','Danimarca orientale (Danimarca)', 'Romania',
+             'Spagna', 'Belgio', 'Lettonia', 'Portogallo', 'Gran Canaria (Spagna)',
+             'Danimarca occidentale (Danimarca)', 'Ungheria', 'Formentera (Spagna)', 'Lussemburgo', 'Finlandia',
+             'Austria', 'Slovenia', 'Maiorca (Spagna)', 'Paesi Bassi', 'Lituania',
+             'Slovacchia', 'Croazia', 'Ibiza (Spagna)', 'Polonia', 'Irlanda',
+             'Sicilia (Italia)', 'Bulgaria', 'Tenerife (Spagna)', 'Germania', 'Centronord (Italia)',
+             'Cipro', 'Minorca (Spagna)', 'Settentrione (Italia)', 'Estonia', 'Fuerteventura Lanzarote (Spagna)',
+             'La Palma (Spagna)', 'Meridione (Italia)', 'La Gomera (Spagna)', 'Centrosud (Italia)', 'Sardegna (Italia)']
 
     nThread=8
 
