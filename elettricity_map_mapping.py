@@ -552,8 +552,8 @@ if __name__ == '__main__':
 
     c=1
     while (True):
-        timestamp = datetime.today().strftime('%M')
-        if(timestamp=="00"):
+        timestamp = datetime.today().strftime('%M')[1]
+        if(timestamp=="0"):
             timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
             #print(timestamp)
 
@@ -572,4 +572,5 @@ if __name__ == '__main__':
             #print("fine c = ",c)
             c += 1
         else:
+
             time.sleep(10)
