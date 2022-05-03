@@ -553,7 +553,7 @@ if __name__ == '__main__':
 
     while (True):
         timestamp = datetime.today().strftime('%M')
-        if(timestamp=="00"):
+        if(timestamp=="09"):
             print("if")
             timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
             print(timestamp)
