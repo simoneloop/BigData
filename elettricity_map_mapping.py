@@ -571,4 +571,5 @@ if __name__ == '__main__':
 
             #print("fine c = ",c)
             c += 1
-
+        else:
+            time.sleep(10)
