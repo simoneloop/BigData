@@ -3,7 +3,7 @@
 sudo apt-get update
 sudo apt-get upgrade
 
-
+loadkeys it
 sudo apt install python3-pip
 
 pip install selenium

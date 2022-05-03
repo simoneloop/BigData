@@ -551,24 +551,23 @@ if __name__ == '__main__':
 
 
     c=1
-    while (True):
-        timestamp = datetime.today().strftime('%M')
-        if(timestamp=="00"):
-            timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
-            #print(timestamp)
+    while (c <= 4320):
+        timestamp = datetime.today().strftime('%H:%M %d-%m-%Y')
+        #print(timestamp)
 
-            for i in range(nThread):
-                t = Thread(target=run, args=(timestamp,output[i],))
-                t.start()
-            time.sleep(540)
-            if c%36==0:
-                try:
-                    #print("Salvataggio nel Drive")
-                    controller()
-                except:
-                    pass
-                    #print("non sono riuscito a salvare")
+        for i in range(nThread):
+            t = Thread(target=run, args=(timestamp,output[i],))
+            t.start()
+        time.sleep(600)
+        if c%36==0:
+            try:
+                #print("Salvataggio nel Drive")
+                controller()
+            except:
+                pass
+                #print("non sono riuscito a salvare")
 
-            #print("fine c = ",c)
-            c += 1
+        #print("fine c = ",c)
+        c += 1
+
 
