@@ -48,27 +48,34 @@ if __name__ == '__main__':
             numc=sheet_obj.max_column+1
 
 
-            # ripara timestamp non alliniati a 00 10 20 30 40 50
+            # ripara timestamp non alliniati a 00 10 20 30 40 50 + gestisce l'ultima colonna  total_production se contiene i
+            # valori al posto di total_capacity (errore previsto per via aggiornamento codice non necessario in caso di ripartenza da 0 con i file excel)
             rnew=[]
 
             c = []
-            for j in range(1, numc):
+            for j in range(1, numc-1):
+                    if(j!=5):
                         c.append(sheet_obj.cell(row=1, column=j).value)
+                    else:
+                        c.append(sheet_obj.cell(row=1, column=numc-1).value)
             rnew.append(c)
 
 
             for i in range(2,numr):
                 c=[]
-                for j in range(1, numc):
+                for j in range(1, numc-1):
                     tmp=sheet_obj.cell(row=i, column=j).value
 
-                    if j != 1:
+                    if j != 1 and j != 5:
                         c.append(tmp)
                     else:
-                        if(tmp[4] != "0"):
+                        if(j==1 and tmp[4] != "0"):
                             c.append(tmp[0:4] + "0" + tmp[5:])
                         else:
-                            c.append(tmp)
+                            if(j==5 and tmp==None):
+                                c.append(sheet_obj.cell(row=i, column=numc - 1).value)
+                            else:
+                                c.append(tmp)
                 rnew.append(c)
 
             file_excel.close()
