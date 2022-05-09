@@ -46,7 +46,7 @@ def create_zip(path, file_name):
 
 def controller():
     # folder path to backup
-    path = "states"
+    path = "../states"
     # get machine date and time
     now = datetime.now()
     # new backup name
@@ -57,7 +57,7 @@ def controller():
         # start API authentication
         auth, drive = google_auth()
         # start file upload
-        upload_backup(drive, "backup", file_name + '.zip')
+        upload_backup(drive, "../backup", file_name + '.zip')
 
 
 ######################## flusso dati
@@ -93,7 +93,7 @@ dataframe = pd.DataFrame(
 
 url_elettricity_map = "https://app.electricitymap.org/map?lang=it"
 
-STATES_DIR="states"
+STATES_DIR= "../states"
 
 arts=['dal/dalla','il/la']
 

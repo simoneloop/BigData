@@ -34,7 +34,7 @@ stati = ['El Hierro (Spagna)', 'Svezia', 'Francia','Danimarca orientale (Danimar
              'Cipro', 'Minorca (Spagna)', 'Settentrione (Italia)', 'Estonia', 'Fuerteventura Lanzarote (Spagna)',
              'La Palma (Spagna)', 'Meridione (Italia)', 'La Gomera (Spagna)', 'Centrosud (Italia)', 'Sardegna (Italia)']
 
-STATES_DIR = "statesRiparati"
+STATES_DIR = "../statesRiparati"
 
 if __name__ == '__main__':
     #statii = ['Germania']
