@@ -158,6 +158,7 @@ def get_exchange_data(data):
     exchange_state=None
     flag_deposit=None
     emissions=None
+    exchange = None
 
     if (re.search('esportata', text[0])):
         exchange_state = text[0].split("in")[1]
