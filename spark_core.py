@@ -1,5 +1,6 @@
 import time
-
+import findspark
+findspark.init()
 from pyspark.sql import SparkSession
 
 import pandas as pd
@@ -13,21 +14,21 @@ if __name__ == '__main__':
     print("INIZIO")
 
     spark = SparkSession.builder.appName('core').getOrCreate()
-    df = spark.sql('''select 'spark' as hello ''')
-    print(df)
+
+
     path = "./states"
 
     print(os.listdir(path))
     for f in os.listdir(path):
         print(f)
-        #xcel = pd.read_excel(path + "/" + f)
-        #f=f.split(".")[0]
+        xcel = pd.read_excel(path + "/" + f)
+        f=f.split(".")[0]
 
 
-        #xcel.to_csv("./statesCSV/"+ f +".csv", index=False)
+        xcel.to_csv("./statesCSV/"+ f +".csv", index=False)
         #rdd = spark.sparkContext.textFile(path + "/Austria.csv")
 
-    rdd = spark.sparkContext.textFile("./statesCSV/" + "Austria.csv")
-    rdd=rdd.collect()
-    print(rdd)
-    time.sleep(10000)
+    #rdd = spark.sparkContext.textFile("./statesCSV/" + "Austria.csv")
+    #rdd=rdd.collect()
+    #print(rdd)
+    #time.sleep(10000)

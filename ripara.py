@@ -281,7 +281,10 @@ if __name__ == '__main__' :
                 j = 0
                 tmp = {}
                 for df in dataframe :
-                    tmp[df] = nuovofile[i][j]
+                    if(isinstance(nuovofile[i][j], str)):
+                        tmp[df] = nuovofile[i][j].replace(";","@").replace(" ","")
+                    else:
+                        tmp[df] = nuovofile[i][j]
                     j += 1
                 dfbbb = pd.concat([dataframe.copy(), pd.DataFrame(tmp, index=[0])], ignore_index=True)
                 dfaaa = pd.concat([dfaaa, dfbbb])
