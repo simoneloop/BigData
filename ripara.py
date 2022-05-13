@@ -282,7 +282,7 @@ if __name__ == '__main__' :
                 tmp = {}
                 for df in dataframe :
                     if(isinstance(nuovofile[i][j], str)):
-                        tmp[df] = nuovofile[i][j].replace(";","@").replace(" ","")
+                        tmp[df] = nuovofile[i][j].replace(";","@")
                     else:
                         tmp[df] = nuovofile[i][j]
                     j += 1
