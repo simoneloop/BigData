@@ -14,8 +14,8 @@ if __name__ == '__main__':
     print("INIZIO")
 
     spark = SparkSession.builder.appName('core').getOrCreate()
-    '''
 
+    '''
     path = "./states"
 
     print(os.listdir(path))
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         xcel["stato"]=f
 
         xcel.to_csv("./statesCSV/"+ f +".csv", index=False)
-    
+   
     df=0
     count=0
     path1="./statesCSV"
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             count = 1
         else:
             df=pd.concat([df,pd.read_csv(path1 + "/" + f)])
-    df.to_csv("./statesCSV/" + "totalstates" + ".csv", index=False)
+    df.to_csv(path1 + "totalStates" + ".csv", index=False)
     '''
     rdd0 = spark.sparkContext.textFile("C:/workSpacepy/BigData/statesCSV/totalstates.csv")
 
