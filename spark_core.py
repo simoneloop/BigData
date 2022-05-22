@@ -1,19 +1,26 @@
-import time
 import findspark
 findspark.init()
+import time
 from pyspark.sql import SparkSession
-
 import pandas as pd
 import os
+import multiprocessing
+from enum import Enum
+class col(Enum):
+    timestamp: 0
+    carbon_intensity: 1
+    low_emissions: 2
+
+#n_core = multiprocessing.cpu_count()
 
 
 if __name__ == '__main__':
-
-    from pyspark.sql import SparkSession
-
     print("INIZIO")
 
-    spark = SparkSession.builder.appName('core').getOrCreate()
+    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
+    #print(spark.getActiveSession())
+
 
     '''
     path = "./states"
@@ -40,7 +47,21 @@ if __name__ == '__main__':
             df=pd.concat([df,pd.read_csv(path1 + "/" + f)])
     df.to_csv(path1 + "totalStates" + ".csv", index=False)
     '''
-    rdd0 = spark.sparkContext.textFile("C:/workSpacepy/BigData/statesCSV/totalstates.csv")
+
+    sc=spark.sparkContext
+    rdd0 = sc.parallelize(sc.textFile("C:/workSpacepy/BigData/statesCSV/totalStates.csv").collect(),numSlices=1000)
+    print("initial partition count:" + str(rdd0.getNumPartitions()))
+
+
+    rdd1 = rdd0.map(lambda x:(x,1))
+    print(rdd1.collect())
+    #for r in rdd1.collect():
+        #print(r[col.carbon_intensity])
+
+    #print(rdd0.take(4))
+    #rdd1 = rdd0.map(lambda x: )
+    #df2 = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"), ('carbon_intensity')])
+    #df2.show()
 
     #for r in rdd3.collect():
     #    print(r)
