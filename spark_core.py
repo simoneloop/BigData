@@ -2,16 +2,77 @@ import findspark
 findspark.init()
 import time
 from pyspark.sql import SparkSession
-import pandas as pd
 import os
 import multiprocessing
-from enum import Enum
-class col(Enum):
-    timestamp: 0
-    carbon_intensity: 1
-    low_emissions: 2
+from pyspark.sql.functions import *
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+from pyspark.sql.types import IntegerType
+from pyspark.sql.types import FloatType
 
-#n_core = multiprocessing.cpu_count()
+n_core = multiprocessing.cpu_count()
+path = "./statesCSV"
+
+precedent_dates_filters=None
+new_date_filter=None
+
+
+fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
+map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), StringType())
+
+def get_fascia_oraria(x):
+    hh = x.split(":")[0]
+    hh = int(hh)
+    if (hh >= 00 and hh < 6):
+        return "notte"
+    elif (hh >= 6 and hh < 12):
+        return "mattina"
+    elif (hh >= 12 and hh < 18):
+        return "pomeriggio"
+    elif (hh >= 18 and hh <= 23):
+        return "sera"
+
+
+
+
+def get_consumo(x, y, z):
+
+    import_q = 0
+    export_q = 0
+
+    for i in y.split("@"):
+        if (i):
+            import_q += float(i.split("_")[2])
+    for i in z.split("@"):
+        if (i):
+            export_q += float(i.split("_")[2])
+
+    cont = x + import_q + export_q
+    return format(float(cont), 'f')
+
+
+#giorni>fasciaoraria>stati/sottostati>fonti
+# if(filtrifasciaoraria==full):
+#     fasciaoraria=giorni
+# else:
+#     fasciaoraria=filt(filtrifasciaoraria(giorni))
+#
+
+
+# if(precedent_dates_filters!=new_date_filter):
+#     pass
+#     #recalculate date database
+#
+# def filter_on_dates(dates):
+#     pass
+#     #return new database
+# def get_nstates_on_source(n,source_list):
+#     pass
+#
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -47,29 +108,14 @@ if __name__ == '__main__':
             df=pd.concat([df,pd.read_csv(path1 + "/" + f)])
     df.to_csv(path1 + "totalStates" + ".csv", index=False)
     '''
-
-    sc=spark.sparkContext
-    rdd0 = sc.parallelize(sc.textFile("C:/workSpacepy/BigData/statesCSV/totalStates.csv").collect(),numSlices=1000)
-    print("initial partition count:" + str(rdd0.getNumPartitions()))
+    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
 
-    rdd1 = rdd0.map(lambda x:(x,1))
-    print(rdd1.collect())
-    #for r in rdd1.collect():
-        #print(r[col.carbon_intensity])
+    tmp = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+    df.show()
+    df1 = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
-    #print(rdd0.take(4))
-    #rdd1 = rdd0.map(lambda x: )
-    #df2 = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"), ('carbon_intensity')])
-    #df2.show()
-
-    #for r in rdd3.collect():
-    #    print(r)
-    #rdd0.max(carbon"_intensity)
-
-    #rdd = spark.sparkContext.textFile(path + "/Austria.csv")
-
-    #rdd = spark.sparkContext.textFile("./statesCSV/" + "Austria.csv")
-    #rdd=rdd.collect()
-    #print(rdd)
-    #time.sleep(10000)
+    df2 = df1.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),("fascia_oraria")])
+    df.show()
+    df = df2.join(df)
+    df.show(300)
