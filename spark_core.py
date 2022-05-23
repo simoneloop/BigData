@@ -111,11 +111,18 @@ if __name__ == '__main__':
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
 
-    tmp = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-    df.show()
-    df1 = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
 
-    df2 = df1.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),("fascia_oraria")])
-    df.show()
-    df = df2.join(df)
-    df.show(300)
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),'*'])
+
+    #df.show(300)
+    print("att")
+    time.sleep(10)
+    print("attfine")
+    print(df.count())
+
+    print(df.filter(df['carbon_intensity']>300).count())
+    print(df.filter(df['carbon_intensity']<200).count())
+    #df.show(300)
