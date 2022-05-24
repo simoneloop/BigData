@@ -6,9 +6,10 @@ import os
 import multiprocessing
 from pyspark.sql.functions import *
 from pyspark.sql.functions import udf
-from pyspark.sql.types import StringType
+from pyspark.sql.types import StringType, DoubleType
 from pyspark.sql.types import IntegerType
 from pyspark.sql.types import FloatType
+from pyspark.sql.types import DoubleType
 
 n_core = multiprocessing.cpu_count()
 path = "./statesCSV"
@@ -18,7 +19,7 @@ new_date_filter=None
 
 
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
-map_consumo = udf(lambda x: get_consumo(x), StringType())
+map_consumo = udf(lambda x , y ,z: get_consumo(x,y,z), StringType())
 
 def get_fascia_oraria(x):
     hh = x.split(":")[0]
@@ -35,20 +36,37 @@ def get_fascia_oraria(x):
 
 
 
-def get_consumo(x):
+def get_consumo(x,y,z):
 
     import_q = 0
     export_q = 0
-    print
-    for i in x[0].exchange_import.split("@"):
-        if (i):
-            import_q += float(i.split("_")[2])
-    for i in x[0].exchange_export.split("@"):
-        if (i):
-            export_q += float(i.split("_")[2])
-    
-    cont = float(x[0].total_production) + import_q + export_q
-    #print(cont)
+    try:
+        n=y.split("@")
+        for i in n:
+            if (i):
+                try:
+                    import_q=float(i.split("_")[2])
+                except Exception as e:
+                    print(e)
+                    import_q += 0
+    except Exception as e:
+        #print(e)
+        import_q += 0
+
+    try :
+        n = z.split("@")
+        for i in n:
+            if (i):
+                try :
+                    export_q = float(i.split("_")[2])
+                except Exception as e:
+                    print(e)
+                    export_q += 0
+    except Exception as e:
+        #print(e)
+        export_q += 0
+
+    cont = float(x) + import_q + export_q
     return cont
 
 
@@ -118,12 +136,11 @@ if __name__ == '__main__':
     '''
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
+    #df=df.filter(df['stato']=='Austria')
 
-    df = df.withColumn("consumo", map_consumo(df.select(struct('total_production', 'exchange_export', 'exchange_import').alias("structed"))))
-    #struct('total_production', 'exchange_export', 'exchange_import'))
+    df = df.withColumn("consumo", map_consumo(df['total_production'],df['exchange_import'],df['exchange_export']))
 
-
-    #df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),'*'])
     df1 = df.cache()
