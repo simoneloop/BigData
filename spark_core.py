@@ -18,7 +18,7 @@ new_date_filter=None
 
 
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
-map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), StringType())
+map_consumo = udf(lambda x: get_consumo(x), StringType())
 
 def get_fascia_oraria(x):
     hh = x.split(":")[0]
@@ -35,20 +35,21 @@ def get_fascia_oraria(x):
 
 
 
-def get_consumo(x, y, z):
+def get_consumo(x):
 
     import_q = 0
     export_q = 0
-
-    for i in y.split("@"):
+    print
+    for i in x[0].exchange_import.split("@"):
         if (i):
             import_q += float(i.split("_")[2])
-    for i in z.split("@"):
+    for i in x[0].exchange_export.split("@"):
         if (i):
             export_q += float(i.split("_")[2])
-
-    cont = x + import_q + export_q
-    return format(float(cont), 'f')
+    
+    cont = float(x[0].total_production) + import_q + export_q
+    #print(cont)
+    return cont
 
 
 #giorni>fasciaoraria>stati/sottostati>fonti
@@ -71,6 +72,12 @@ def get_consumo(x, y, z):
 #
 
 
+def query_timestamp(df, x, y):
+    return df.filter(df['timestamp_inMillis']>=x).filter(df['timestamp_inMillis']<=y)
+
+def query_fascia_oraria(df, M, P,S,N):
+
+    return df.filter(df['fascia_orari']=='mattina')
 
 
 
@@ -79,6 +86,7 @@ if __name__ == '__main__':
     print("INIZIO")
 
     spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
 
     #print(spark.getActiveSession())
 
@@ -111,18 +119,31 @@ if __name__ == '__main__':
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
 
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+    df = df.withColumn("consumo", map_consumo(df.select(struct('total_production', 'exchange_export', 'exchange_import').alias("structed"))))
+    #struct('total_production', 'exchange_export', 'exchange_import'))
 
-    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    #df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),'*'])
-
+    df1 = df.cache()
+    print(df1.describe())
+    df1.show()
     #df.show(300)
-    print("att")
-    time.sleep(10)
-    print("attfine")
-    print(df.count())
 
-    print(df.filter(df['carbon_intensity']>300).count())
-    print(df.filter(df['carbon_intensity']<200).count())
+    #print(df.count())
+
+    #print(df.filter(df['carbon_intensity']>300).count())
+    #print(df.filter(df['carbon_intensity']<200).count())
+
+    x=1650474000
+    y=1650475200
+
+    df=query_timestamp(df,x,y)
+    df.show()
+
+    #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
+    #df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).show()
     #df.show(300)
+
+    time.sleep(10000)
