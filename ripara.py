@@ -210,7 +210,7 @@ if __name__ == '__main__' :
 
             for i in range(1, numr - 1) :
                 timestamp = int(round(datetime.strptime(rnew[i][0], '%H:%M %d-%m-%Y').timestamp()))
-                starttime += 600
+
 
                 if (timestamp == starttime) :
                     nuovofile.append(rnew[i])
@@ -222,9 +222,10 @@ if __name__ == '__main__' :
                             [timestampnew, None, None, None, None, None, None, None, None, None, None, None, None, None,
                              None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
                              None, None, None, None, None, None, None, None, None, None, None, None, None, None, None])
-
                         starttime += 600
+
                     nuovofile.append(rnew[i])
+                starttime += 600
             #######################################################################################################################################################################
             print(len(nuovofile))
 

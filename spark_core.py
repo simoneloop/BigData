@@ -1,6 +1,7 @@
 import findspark
 findspark.init()
 import time
+import pandas as pd
 from pyspark.sql import SparkSession
 import os
 import multiprocessing
@@ -166,14 +167,14 @@ if __name__ == '__main__':
    
     df=0
     count=0
-    path1="./statesCSV"
+    path1="./statesCSV/"
     print(os.listdir(path1))
     for f in os.listdir(path1):
         if(count == 0):
-            df=pd.read_csv(path1 + "/" + f)
+            df=pd.read_csv(path1 + f)
             count = 1
         else:
-            df=pd.concat([df,pd.read_csv(path1 + "/" + f)])
+            df=pd.concat([df,pd.read_csv(path1 + f)])
     df.to_csv(path1 + "totalStates" + ".csv", index=False)
     '''
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
@@ -200,7 +201,7 @@ if __name__ == '__main__':
                 c= valori.count()
                 somma= valori
                 print(t[0],s[0],c)
-    df
+
     #tmp= tmp.filter()
 
     #time.show()
@@ -247,10 +248,6 @@ if __name__ == '__main__':
     #df.show(300)
 
     #time.sleep(10000)
-
-    from pyspark.sql import DataFrame
-    from typing import Iterable
-
 
 
 
