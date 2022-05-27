@@ -17,10 +17,9 @@ path = "./statesCSV"
 precedent_dates_filters=None
 new_date_filter=None
 
-
+stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x , y ,z: get_consumo(x,y,z), FloatType())
-stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 sum_import_export=udf(lambda x:get_sum_import_export(x),FloatType())
 
 
@@ -31,7 +30,6 @@ col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emis
 
 
 def get_sum_import_export(x):
-
     sum= 0
     try :
         n = x.split("@")
@@ -46,9 +44,6 @@ def get_sum_import_export(x):
         #print(e)
         sum += 0
     return sum
-
-
-
 
 
 def get_stato_maggiore(x):
@@ -69,8 +64,6 @@ def get_fascia_oraria(x):
         return "pomeriggio"
     elif (hh >= 18 and hh <= 23):
         return "sera"
-
-
 
 
 def get_consumo(x,y,z):
@@ -132,9 +125,9 @@ def query_timestamp(df, giorni):
     tmp=None
     for i in giorni:
         if(tmp):
-            tmp=tmp.union(df.filter(df['timestamp_inMillis']>=i).filter(df['timestamp_inMillis']<i+millis_day))
+            tmp=tmp.union(df.filter(df['timestamp_inSeconds']>=i).filter(df['timestamp_inSeconds']<i+millis_day))
         else:
-            tmp=df.filter(df['timestamp_inMillis']>=i).filter(df['timestamp_inMillis']<i+millis_day)
+            tmp=df.filter(df['timestamp_inSeconds']>=i).filter(df['timestamp_inSeconds']<i+millis_day)
     return tmp
 
 def query_fascia_oraria(df, fasce):
@@ -230,7 +223,7 @@ if __name__ == '__main__':
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
 
-    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSecond"),'*'])
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),'*'])
     df1 = df.cache()
     #print(df1.describe())
     #df1.show()
