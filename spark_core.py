@@ -1,7 +1,6 @@
 import findspark
 findspark.init()
 import time
-import pandas as pd
 from pyspark.sql import SparkSession
 import os
 import multiprocessing
@@ -20,13 +19,33 @@ new_date_filter=None
 
 
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
-map_consumo = udf(lambda x , y ,z: get_consumo(x,y,z), StringType())
+map_consumo = udf(lambda x , y ,z: get_consumo(x,y,z), FloatType())
 stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
+sum_import_export=udf(lambda x:get_sum_import_export(x),FloatType())
 
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
+
+
+
+def get_sum_import_export(x):
+
+    sum= 0
+    try :
+        n = x.split("@")
+        for i in n:
+            if (i):
+                try :
+                    sum = float(i.split("_")[2])
+                except Exception as e:
+                    print(e)
+                    sum += 0
+    except Exception as e:
+        #print(e)
+        sum += 0
+    return sum
 
 
 
@@ -182,39 +201,36 @@ if __name__ == '__main__':
     #df=df.filter(df['stato']=='Austria')
 
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-
-    #df = df.withColumn("carbon_intensity_avg", carbon_intensity_avg(df['timestamp'],df["carbon_intensity"],df['stato_maggiore']))
-
-    #sottoStati= df.filter(df['stato'])
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
     df.cache()
 
-    tmp = df.filter('stato_maggiore != stato')
-    timestamp_unique = tmp.dropDuplicates(['timestamp']).select('timestamp')
 
-    #print(timestamp_unique.rdd.collect())
-    dftmp=[]
-    states_unique =tmp.dropDuplicates(['stato']).select('stato_maggiore').dropDuplicates(['stato_maggiore']).rdd.collect()
-    for t in timestamp_unique.rdd.collect():
-            for s in states_unique:
-                #print(t[0],s[0])
-                valori=tmp.filter(tmp['timestamp'] == t[0]).filter(tmp['stato_maggiore'] == s[0]).select('carbon_intensity')
-                c= valori.count()
-                somma= valori
-                print(t[0],s[0],c)
+    averaged = df.groupBy('timestamp', 'stato_maggiore').avg()
+    summed = df.groupBy('timestamp', 'stato_maggiore').sum()
+    df = df.join(averaged,
+                  (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                  "inner").drop(df.timestamp).drop(df.stato_maggiore)
+    df = df.join(summed,
+                   (df['timestamp'] == summed['timestamp']) & (df['stato_maggiore'] == summed['stato_maggiore']),
+                   "inner").drop(df.timestamp).drop(df.stato_maggiore)
+    df.cache()
+    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
-    #tmp= tmp.filter()
-
-    #time.show()
-    #tmp.show(300)
+    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select("avg(sum_import)").show()
+    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
+    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select(
+        "avg(sum_export)").show()
+    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select(
+        "sum(sum_export)").show()
     #df.filter(df['stato_maggiore'] == 'Italia').dropDuplicates((['stato'])).show(300)
 
-    time.sleep(10000)
-    df = df.withColumn("consumo", map_consumo(df['total_production'],df['exchange_import'],df['exchange_export']))
 
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
 
-    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inMillis"),'*'])
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSecond"),'*'])
     df1 = df.cache()
     #print(df1.describe())
     #df1.show()
