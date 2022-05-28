@@ -225,7 +225,6 @@ if __name__ == '__main__':
     df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
 
 
-
     averaged = df.select('timestamp', 'stato_maggiore','carbon_intensity').groupBy('timestamp','stato_maggiore').avg()
     summed = df.groupBy('timestamp', 'stato_maggiore').sum()
     df = df.join(averaged,
