@@ -219,8 +219,6 @@ if __name__ == '__main__':
     '''
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
-    #df=df.filter(df['stato']=='Austria')
-
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
     df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
     df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
@@ -228,7 +226,7 @@ if __name__ == '__main__':
 
 
 
-    averaged = df.groupBy('timestamp', 'stato_maggiore').avg()
+    averaged = df.select('timestamp', 'stato_maggiore','carbon_intensity').groupBy('timestamp','stato_maggiore').avg()
     summed = df.groupBy('timestamp', 'stato_maggiore').sum()
     df = df.join(averaged,
                   (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
@@ -240,8 +238,6 @@ if __name__ == '__main__':
     #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
-
-    #df=df.select(*col_union)
 
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),*col_union])
 
@@ -264,8 +260,8 @@ if __name__ == '__main__':
 
     #print(df.count())
 
-    print(df.filter(df['carbon_intensity']>300).count())
-    print(df.filter(df['carbon_intensity']<200).count())
+    print(df1.filter(df1['carbon_intensity']>300).count())
+    print(df1.filter(df1['carbon_intensity']<200).count())
 
     x=[1650492000,1650578400]
     df1=query_timestamp(df,x)
@@ -279,10 +275,11 @@ if __name__ == '__main__':
     df1=query_stati(df1,stati).select('stato').distinct().show()
     fonti=['nucleare','geotermico']
 
-
+    time.sleep(10000)
     df1=query_fonte(df,fonti)
     df1.show(300)
-    df.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
+
+    df1.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
 
     #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
     #df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).show()
