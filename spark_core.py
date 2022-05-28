@@ -27,6 +27,34 @@ col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emis
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
 
+col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','low_emissions','renewable_emissions',
+               'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
+               'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
+               'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
+               'eolico_emissions','fotovoltaico_installed_capacity','fotovoltaico_production','fotovoltaico_emissions','idroelettrico_installed_capacity',
+               'idroelettrico_production','idroelettrico_emissions','accumuloidro_installed_capacity','accumuloidro_production','accumuloidro_emissions',
+               'batterieaccu_installed_capacity','batterieaccu_production','batterieaccu_emissions','gas_installed_capacity','gas_production',
+               'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
+               'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
+
+col_pro =       ['avg(carbon_intensity)','sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
+                 'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
+                 'sum(geotermico_emissions)','sum(biomassa_installed_capacity)','sum(biomassa_production)','sum(biomassa_emissions)',
+                 'sum(carbone_installed_capacity)','sum(carbone_production)','sum(carbone_emissions)','sum(eolico_installed_capacity)',
+                 'sum(eolico_production)','sum(eolico_emissions)','sum(fotovoltaico_installed_capacity)','sum(fotovoltaico_production)',
+                 'sum(fotovoltaico_emissions)','sum(idroelettrico_installed_capacity)','sum(idroelettrico_production)','sum(idroelettrico_emissions)',
+                 'sum(accumuloidro_installed_capacity)','sum(accumuloidro_production)','sum(accumuloidro_emissions)','sum(batterieaccu_installed_capacity)',
+                 'sum(batterieaccu_production)','sum(batterieaccu_emissions)','sum(gas_installed_capacity)','sum(gas_production)','sum(gas_emissions)',
+                 'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
+                 'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
+
+col_union=[]
+for i in col_classic:
+    col_union.append(i)
+    for j in col_pro:
+        if(j.find(i) != -1):
+            col_union.append(j)
+            break
 
 
 def get_sum_import_export(x):
@@ -197,7 +225,7 @@ if __name__ == '__main__':
     df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
     df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
     df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-    df.cache()
+
 
 
     averaged = df.groupBy('timestamp', 'stato_maggiore').avg()
@@ -208,48 +236,52 @@ if __name__ == '__main__':
     df = df.join(summed,
                    (df['timestamp'] == summed['timestamp']) & (df['stato_maggiore'] == summed['stato_maggiore']),
                    "inner").drop(df.timestamp).drop(df.stato_maggiore)
-    df.cache()
-    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
-    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select("avg(sum_import)").show()
-    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
-    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select(
-        "avg(sum_export)").show()
-    df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").select(
-        "sum(sum_export)").show()
-    #df.filter(df['stato_maggiore'] == 'Italia').dropDuplicates((['stato'])).show(300)
-
+    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
+    #df=df.select(*col_union)
 
-    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),'*'])
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),*col_union])
+
+    print("siamo qua 1")
+    start = time.time()
     df1 = df.cache()
+    df1.count()
+    print("Tempo di cache = ",time.time() - start)
+
+    df1.show()
+    print(df1.count())
+
+    print("siamo qua 2")
+    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
+    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_export)").show()
+    print("siamo qua 3")
     #print(df1.describe())
     #df1.show()
     #df.show(300)
 
     #print(df.count())
 
-    #print(df.filter(df['carbon_intensity']>300).count())
-    #print(df.filter(df['carbon_intensity']<200).count())
+    print(df.filter(df['carbon_intensity']>300).count())
+    print(df.filter(df['carbon_intensity']<200).count())
 
     x=[1650492000,1650578400]
-    #df1=query_timestamp(df,x)
+    df1=query_timestamp(df,x)
 
     y=['mattina','pomeriggio','sera','notte']
-    #df1=query_fascia_oraria(df1,y)
+    df1=query_fascia_oraria(df1,y)
 
 
     stati=["Austria","Francia","Danimarca orientale (Danimarca)"]
 
-    #df1=query_stati(df1,stati)
-    #.select('stato').distinct().show()
+    df1=query_stati(df1,stati).select('stato').distinct().show()
     fonti=['nucleare','geotermico']
 
 
-    #df1=query_fonte(df,fonti)
-    #df1.show(300)
+    df1=query_fonte(df,fonti)
+    df1.show(300)
     df.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
 
     #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
@@ -257,6 +289,7 @@ if __name__ == '__main__':
     #df.show(300)
 
     #time.sleep(10000)
+    print("FINE")
 
 
 
