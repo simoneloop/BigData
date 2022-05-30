@@ -11,8 +11,9 @@ from pyspark.sql.types import IntegerType
 from pyspark.sql.types import FloatType
 from pyspark.sql.types import DoubleType
 
+
 n_core = multiprocessing.cpu_count()
-path = "./statesCSV"
+path = "../statesCSV"
 
 precedent_dates_filters=None
 new_date_filter=None
@@ -27,7 +28,7 @@ col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emis
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
 
-col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
+col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','low_emissions','renewable_emissions',
                'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
                'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
@@ -37,7 +38,7 @@ col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_inte
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
                'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
 
-col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
+col_pro =       ['avg(carbon_intensity)','sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
                  'sum(geotermico_emissions)','sum(biomassa_installed_capacity)','sum(biomassa_production)','sum(biomassa_emissions)',
                  'sum(carbone_installed_capacity)','sum(carbone_production)','sum(carbone_emissions)','sum(eolico_installed_capacity)',
@@ -53,7 +54,7 @@ for i in col_classic:
     col_union.append(i)
     for j in col_pro:
         if(j.find(i) != -1):
-            #col_union.append(j)
+            col_union.append(j)
             break
 
 
@@ -220,87 +221,86 @@ if __name__ == '__main__':
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+
+
 
     averaged = df.select('timestamp', 'stato_maggiore','carbon_intensity').groupBy('timestamp','stato_maggiore').avg()
-    #summed = df.groupBy('timestamp', 'stato_maggiore').sum()
+    summed = df.groupBy('timestamp', 'stato_maggiore').sum()
     df = df.join(averaged,
                   (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
                   "inner").drop(df.timestamp).drop(df.stato_maggiore)
-    #df = df.join(summed,
-                   #(df['timestamp'] == summed['timestamp']) & (df['stato_maggiore'] == summed['stato_maggiore']),
-                   #"inner").drop(df.timestamp).drop(df.stato_maggiore)
+
+
+
+
+    df = df.join(summed,
+                   (df['timestamp'] == summed['timestamp']) & (df['stato_maggiore'] == summed['stato_maggiore']),
+                   "inner").drop(df.timestamp).drop(df.stato_maggiore)
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    print("siamo qua 1")
+    start = time.time()
+    df1=df
+    df1 = df.cache()
+    print("Tempo di cache = ", time.time() - start)
+
+    start = time.time()
+    df1.drop_duplicates(['timestamp','stato_maggiore']).select('stato_maggiore','sum(total_production)').groupBy('stato_maggiore').avg().show()
+    #df1.drop_duplicates(['stato_maggiore']).select("sum(total_production)").show()
+    print("Tempo di riutilizzo della cache = ", time.time() - start)
+    df.hi
+    time.sleep(10000)
+    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-
-    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
-
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-
-    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
-
-
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),*col_union])
 
-    print("siamo qua 1")
-    start = time.time()
-    df1 = df.cache()
-    df1.show()
-    print("Tempo di cache = ",time.time() - start)
 
-    start = time.time()
-    sum = df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg()
-    sum.show()
+    #
+    # df1.show()
+    # print(df1.count())
+    #
+    # print("siamo qua 2")
+    # df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
+    # df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_export)").show()
+    # print("siamo qua 3")
+    # #print(df1.describe())
+    # #df1.show()
+    # #df.show(300)
+    #
+    # #print(df.count())
+    #
+    # print(df1.filter(df1['carbon_intensity']>300).count())
+    # print(df1.filter(df1['carbon_intensity']<200).count())
+    #
+    # x=[1650492000,1650578400]
+    # df1=query_timestamp(df,x)
+    #
+    # y=['mattina','pomeriggio','sera','notte']
+    # df1=query_fascia_oraria(df1,y)
+    #
+    #
+    # stati=["Austria","Francia","Danimarca orientale (Danimarca)"]
+    #
+    # df1=query_stati(df1,stati).select('stato').distinct().show()
+    # fonti=['nucleare','geotermico']
+    #
+    # time.sleep(10000)
+    # df1=query_fonte(df,fonti)
+    # df1.show(300)
+    #
+    # df1.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
+    #
+    # #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
+    # #df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).show()
+    # #df.show(300)
+    #
+    # #time.sleep(10000)
+    # print("FINE")
 
-    sum1= df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
-    sum1.show()
-    print("Tempo = ", time.time() - start)
-
-
-
-    '''
-    df1.show()
-    print(df1.count())
-
-    print("siamo qua 2")
-    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
-    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_export)").show()
-    print("siamo qua 3")
-    #print(df1.describe())
-    #df1.show()
-    #df.show(300)
-
-    #print(df.count())
-
-    print(df1.filter(df1['carbon_intensity']>300).count())
-    print(df1.filter(df1['carbon_intensity']<200).count())
-
-    x=[1650492000,1650578400]
-    df1=query_timestamp(df,x)
-
-    y=['mattina','pomeriggio','sera','notte']
-    df1=query_fascia_oraria(df1,y)
-
-
-    stati=["Austria","Francia","Danimarca orientale (Danimarca)"]
-
-    df1=query_stati(df1,stati).select('stato').distinct().show()
-    fonti=['nucleare','geotermico']
-
-    time.sleep(10000)
-    df1=query_fonte(df,fonti)
-    df1.show(300)
-
-    df1.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
-
-    #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
-    #df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).show()
-    #df.show(300)
-
-    #time.sleep(10000)
-    print("FINE")
-    '''
 
 
 

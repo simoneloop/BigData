@@ -19,15 +19,16 @@ new_date_filter=None
 
 stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
-map_consumo = udf(lambda x , y ,z: get_consumo(x,y,z), FloatType())
-sum_import_export=udf(lambda x:get_sum_import_export(x),FloatType())
+map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
+sum_import_export=udf(lambda x: get_sum_import_export(x), FloatType())
+repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatType())
 
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
 
-col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','low_emissions','renewable_emissions',
+col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
                'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
                'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
@@ -37,7 +38,7 @@ col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_inte
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
                'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
 
-col_pro =       ['avg(carbon_intensity)','sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
+col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
                  'sum(geotermico_emissions)','sum(biomassa_installed_capacity)','sum(biomassa_production)','sum(biomassa_emissions)',
                  'sum(carbone_installed_capacity)','sum(carbone_production)','sum(carbone_emissions)','sum(eolico_installed_capacity)',
@@ -53,7 +54,7 @@ for i in col_classic:
     col_union.append(i)
     for j in col_pro:
         if(j.find(i) != -1):
-            col_union.append(j)
+            #col_union.append(j)
             break
 
 
@@ -64,7 +65,10 @@ def get_sum_import_export(x):
         for i in n:
             if (i):
                 try :
-                    sum = float(i.split("_")[2])
+                    value = i.split("_")[2]
+                    if (value == "nan"):
+                        value = 0
+                    sum += float(value)
                 except Exception as e:
                     print(e)
                     sum += 0
@@ -103,7 +107,10 @@ def get_consumo(x,y,z):
         for i in n:
             if (i):
                 try:
-                    import_q=float(i.split("_")[2])
+                    value = i.split("_")[2]
+                    if (value == "nan"):
+                        value = 0
+                    import_q+= float(value)
                 except Exception as e:
                     print(e)
                     import_q += 0
@@ -116,7 +123,10 @@ def get_consumo(x,y,z):
         for i in n:
             if (i):
                 try :
-                    export_q = float(i.split("_")[2])
+                    value=i.split("_")[2]
+                    if(value=="nan"):
+                        value=0
+                    export_q += float(value)
                 except Exception as e:
                     print(e)
                     export_q += 0
@@ -126,6 +136,25 @@ def get_consumo(x,y,z):
 
     cont = float(x) + import_q + export_q
     return cont
+def get_new_total_production(x,y):
+    import_q = 0
+
+    try:
+        n = y.split("@")
+        for i in n:
+            if (i):
+                try:
+                    value=i.split("_")[2]
+                    if(value=="nan"):
+                        value=0
+                    import_q += float(value)
+                except Exception as e:
+                    print(e)
+                    import_q += 0
+    except Exception as e:
+        # print(e)
+        import_q += 0
+    return float(x)-import_q
 
 
 #giorni>fasciaoraria>stati/sottostati>fonti
@@ -220,32 +249,40 @@ if __name__ == '__main__':
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-
-
-    averaged = df.select('timestamp', 'stato_maggiore','carbon_intensity').groupBy('timestamp','stato_maggiore').avg()
-    summed = df.groupBy('timestamp', 'stato_maggiore').sum()
+    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+    df.cache()
+    df.filter(df['stato_maggiore']=='Italia').show(10000)
+    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
     df = df.join(averaged,
                   (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
                   "inner").drop(df.timestamp).drop(df.stato_maggiore)
-    df = df.join(summed,
-                   (df['timestamp'] == summed['timestamp']) & (df['stato_maggiore'] == summed['stato_maggiore']),
-                   "inner").drop(df.timestamp).drop(df.stato_maggiore)
-
-    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
 
     df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
+
 
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),*col_union])
 
     print("siamo qua 1")
     start = time.time()
     df1 = df.cache()
-    df1.count()
+    # df1.show()
     print("Tempo di cache = ",time.time() - start)
 
+    start = time.time()
+    sum1= df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+    sum1.show()
+    print("Tempo = ", time.time() - start)
+
+
+
+    '''
     df1.show()
     print(df1.count())
 
@@ -286,7 +323,7 @@ if __name__ == '__main__':
 
     #time.sleep(10000)
     print("FINE")
-
+    '''
 
 
 
