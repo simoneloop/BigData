@@ -250,8 +250,7 @@ if __name__ == '__main__':
 
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
     df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
-    df.cache()
-    df.filter(df['stato_maggiore']=='Italia').show(10000)
+
     averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
     df = df.join(averaged,
                   (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
@@ -276,7 +275,19 @@ if __name__ == '__main__':
     print("Tempo di cache = ",time.time() - start)
 
     start = time.time()
-    sum1= df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+    sum1= df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+    sum1.show()
+
+    sum1 = df1.select('time_stamp','fotovoltaico_production').groupBy('time_stamp').avg()
     sum1.show()
     print("Tempo = ", time.time() - start)
 
