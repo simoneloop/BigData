@@ -20,12 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89e562ba-9df4-438e-94a2-9984dc1b691c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/web/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/BigData.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BigData.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/server_spark.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/templates/front_spark/process.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spark_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/spark_core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/spark_coreprova.py" beforeDir="false" afterPath="$PROJECT_DIR$/proveEResto/spark_core_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/elettricity_analisys/elettricity_analisys/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/elettricity_analisys/elettricity_analisys/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/templates/front_spark/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/templates/front_spark/test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/elettricity_analisys/front_spark/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,6 +37,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="HTML File" />
         <option value="Python Script" />
       </list>
     </option>
@@ -49,6 +52,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/web" />
@@ -62,7 +66,7 @@
       <recent name="D:\BigData\proveEResto" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.prova">
+  <component name="RunManager" selected="Python.server_spark">
     <configuration name="prova" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="BigData" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -77,6 +81,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prova.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="server_spark" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="BigData" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/server/server_spark.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -131,6 +157,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.server_spark" />
         <item itemvalue="Python.spark_core_old" />
         <item itemvalue="Python.prova" />
       </list>
@@ -155,6 +182,9 @@
       <workItem from="1653844088089" duration="1904000" />
       <workItem from="1653846089644" duration="525000" />
       <workItem from="1653846634544" duration="1412000" />
+      <workItem from="1653901299577" duration="571000" />
+      <workItem from="1654673953718" duration="8622000" />
+      <workItem from="1654684499405" duration="2406000" />
     </task>
     <servers />
   </component>
@@ -174,29 +204,33 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="526" y="214" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1654683622168">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="526" y="214" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654683622168" />
     <state x="543" y="178" key="FileChooserDialogImpl" timestamp="1652289226822">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="543" y="178" key="FileChooserDialogImpl/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1652289226822" />
-    <state width="1470" height="146" key="GridCell.Tab.0.bottom" timestamp="1653772129217">
+    <state width="724" height="186" key="GridCell.Tab.0.bottom" timestamp="1654694020951">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1470" height="146" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1653772129217" />
+    <state width="724" height="186" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654694020951" />
     <state width="1493" height="197" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1470" height="146" key="GridCell.Tab.0.center" timestamp="1653772129217">
+    <state width="724" height="186" key="GridCell.Tab.0.center" timestamp="1654694020951">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1470" height="146" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1653772129217" />
+    <state width="724" height="186" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654694020951" />
     <state width="1493" height="197" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1470" height="146" key="GridCell.Tab.0.left" timestamp="1653772129217">
+    <state width="724" height="186" key="GridCell.Tab.0.left" timestamp="1654694020951">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1470" height="146" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1653772129217" />
+    <state width="724" height="186" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654694020951" />
     <state width="1493" height="197" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1470" height="146" key="GridCell.Tab.0.right" timestamp="1653772129217">
+    <state width="724" height="186" key="GridCell.Tab.0.right" timestamp="1654694020951">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1470" height="146" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1653772129217" />
+    <state width="724" height="186" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654694020951" />
     <state width="1493" height="197" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
     <state width="1470" height="261" key="GridCell.Tab.1.bottom" timestamp="1653757066154">
       <screen x="0" y="0" width="1536" height="824" />
@@ -214,10 +248,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1470" height="261" key="GridCell.Tab.1.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1653757066154" />
-    <state x="-1487" y="76" width="981" height="707" key="SettingsEditor" timestamp="1652289826934">
+    <state x="-1487" y="76" width="981" height="707" key="SettingsEditor" timestamp="1654684344777">
       <screen x="-1680" y="27" width="1344" height="800" />
     </state>
-    <state x="-1487" y="76" width="981" height="707" key="SettingsEditor/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1652289826934" />
+    <state x="-1487" y="76" width="981" height="707" key="SettingsEditor/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654684344777" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1653318665605">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -226,6 +260,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/BigData$spark_coreprova.coverage" NAME="spark_coreprova Coverage Results" MODIFIED="1653762382461" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/BigData$spark_core.coverage" NAME="spark_core Coverage Results" MODIFIED="1653757249188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BigData$server_spark.coverage" NAME="server_spark Coverage Results" MODIFIED="1654694020936" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/BigData$prova.coverage" NAME="prova Coverage Results" MODIFIED="1653228495377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
