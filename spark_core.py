@@ -271,7 +271,7 @@ if __name__ == '__main__':
     print("siamo qua 1")
     start = time.time()
     df1 = df.cache()
-    # df1.show()
+    df1.count()
     print("Tempo di cache = ",time.time() - start)
 
     start = time.time()
@@ -281,13 +281,15 @@ if __name__ == '__main__':
     sum1 = df1.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
     sum1.show()
 
+    #query sul carbon_intensity stato intero
     sum1 = df1.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
     sum1.show()
-
+    # query sul carbon_intensity stato/sottostati
     sum1 = df1.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
     sum1.show()
 
-    sum1 = df1.select('time_stamp','fotovoltaico_production').groupBy('time_stamp').avg()
+
+    sum1 = df1.select('timestamp', 'fotovoltaico_production').groupBy('timestamp').sum()
     sum1.show()
     print("Tempo = ", time.time() - start)
 
