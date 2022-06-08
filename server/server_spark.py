@@ -1,12 +1,24 @@
+import findspark
+findspark.init()
+import time
+from pyspark.sql import SparkSession
+import os
+from pyspark.sql.functions import *
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType, DoubleType
+from pyspark.sql.types import IntegerType
+from pyspark.sql.types import FloatType
+from pyspark.sql.types import DoubleType
 from http.server import HTTPServer,BaseHTTPRequestHandler
 import json
-from BigData.server.spark_core import prova
+from spark_core import *
+
 
 HOST='localhost'
 PORT=8080
 REQUEST_FILTER_ONE='func1'
 
-ALL_FUNC=['func1','func2','func3']
+ALL_FUNC=['func1','func2','func3','init']
 
 def get_params(path):
     if('?' in path):
@@ -52,16 +64,66 @@ class SparkServer(BaseHTTPRequestHandler):
                 response=json.dumps(params)
                 self.wfile.write(response.encode())
             elif(service_address=="func3"):
-                response=prova()
-                self.wfile.write(response)
+                rows=prova(df1)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+
+            elif (service_address == "init"):
+                map = {}
+                tmp=[]
+                stati = df1.select('stato').distinct().collect()
+                for s in stati:
+                    tmp.append(s[0])
+                map['stati'] = tmp
+
+                tmp = []
+                stati_sottostati = df1.select('stato_maggiore').distinct().collect()
+                for s in  stati_sottostati:
+                    tmp.append(s[0])
+                map['stati_sottostati'] = tmp
+
+                inizio = df1.select(first('timestamp')).collect()
+                fine = df1.select(last('timestamp')).collect()
+
+                map['start_time'] = inizio
+                map['end_time'] = fine
+                map['fonti']=fonti
+                self.wfile.write(json.dumps(map).encode())
         else:
             self.send_response(404)
 
 def main():
+    # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    print("Run Spark")
+    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
+    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
+
+    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+
+    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
+    df = df.join(averaged,
+                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
+
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    global df1
+    df1 = df.cache()
+    df1.count()
+
+    #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     server_address=(HOST,PORT)
     server=HTTPServer(server_address,SparkServer)
     print('Server running on port %s' % PORT)
     server.serve_forever()
+    # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if __name__=='__main__':
     main()

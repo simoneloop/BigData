@@ -38,6 +38,9 @@ col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_inte
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
                'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
 
+fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio',
+         'sconosciuto']
+
 col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
                  'sum(geotermico_emissions)','sum(biomassa_installed_capacity)','sum(biomassa_production)','sum(biomassa_emissions)',
@@ -211,37 +214,18 @@ def query_fonte(df, fonti):
 
     return df.select(*col_selezionate)
 
-def prova():
+def prova(df1):
     print("INIZIO")
 
-    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
-
-    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
-
-    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
-
-    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
-    df = df.join(averaged,
-                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
-                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
-
-    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
-
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-
-    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
-
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-
-    df1 = df.cache()
 
     sum1 = df1.select('stato', 'stato_maggiore', 'total_production').groupBy('stato', 'stato_maggiore').avg().groupBy(
         'stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
-    print("fine")
-    sum1.show()
 
-    return sum1
+    sum1.show()
+    print("fine")
+    return sum1.select(to_json(struct('*')).alias("json")).collect()
+
+
 
 if __name__ == '__main__':
     print("INIZIO")
