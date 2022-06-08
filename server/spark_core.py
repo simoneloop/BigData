@@ -240,7 +240,8 @@ def prova():
         'stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
     print("fine")
     sum1.show()
-    return sum1.toJSON()
+
+    return sum1
 
 if __name__ == '__main__':
     print("INIZIO")

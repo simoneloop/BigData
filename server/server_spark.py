@@ -9,22 +9,28 @@ REQUEST_FILTER_ONE='func1'
 ALL_FUNC=['func1','func2','func3']
 
 def get_params(path):
-    param=path.split('?')[1]
-    params=param.split("&")
-    res={}
-    for p in params:
-        tmp=p.split("=")
-        if("[" in tmp[1] or "]" in tmp[1]):
-            list=tmp[1].strip('][').split(',')
-            res[tmp[0]]=list
-        else:
-            res[tmp[0]]=tmp[1]
-    return res
+    if('?' in path):
+        param=path.split('?')[1]
+        params=param.split("&")
+        res={}
+        for p in params:
+            tmp=p.split("=")
+            if("[" in tmp[1] or "]" in tmp[1]):
+                list=tmp[1].strip('][').split(',')
+                res[tmp[0]]=list
+            else:
+                res[tmp[0]]=tmp[1]
+        return res
+    else:
+        return None
 
 def get_service_address(path):
-    serviceAddress=path.split("?")[0]
-    serviceAddress=serviceAddress.split("/")
-    serviceAddress=serviceAddress[len(serviceAddress)-1]
+    serviceAddress=path
+    if ('?' in path) :
+        serviceAddress=path.split("?")[0]
+
+    serviceAddress = serviceAddress.split("/")
+    serviceAddress = serviceAddress[len(serviceAddress) - 1]
     return serviceAddress
 
 class SparkServer(BaseHTTPRequestHandler):
@@ -46,7 +52,8 @@ class SparkServer(BaseHTTPRequestHandler):
                 response=json.dumps(params)
                 self.wfile.write(response.encode())
             elif(service_address=="func3"):
-                response=json.dumps(prova())
+                response=prova()
+                self.wfile.write(response.encode())
         else:
             self.send_response(404)
 
@@ -58,3 +65,4 @@ def main():
 
 if __name__=='__main__':
     main()
+
