@@ -53,7 +53,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 self.wfile.write(response.encode())
             elif(service_address=="func3"):
                 response=prova()
-                self.wfile.write(response.encode())
+                self.wfile.write(response)
         else:
             self.send_response(404)
 
