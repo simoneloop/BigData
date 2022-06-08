@@ -22,7 +22,7 @@ fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
 sum_import_export=udf(lambda x: get_sum_import_export(x), FloatType())
 repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatType())
-
+repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
@@ -159,6 +159,26 @@ def get_new_total_production(x,y):
         import_q += 0
     return float(x)-import_q
 
+def get_new_total_emissions(x,y):
+    import_q = 0
+
+    try:
+        n = y.split("@")
+        for i in n:
+            if (i):
+                try:
+                    value=i.split("_")[3]
+                    if(value=="nan"):
+                        value=0
+                    import_q += float(value)
+                except Exception as e:
+                    print(e)
+                    import_q += 0
+    except Exception as e:
+        # print(e)
+        import_q += 0
+    return float(x)-import_q
+
 
 #giorni>fasciaoraria>stati/sottostati>fonti
 # if(filtrifasciaoraria==full):
@@ -221,7 +241,6 @@ def prova(df1):
     sum1 = df1.select('stato', 'stato_maggiore', 'total_production').groupBy('stato', 'stato_maggiore').avg().groupBy(
         'stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
 
-    sum1.show()
     print("fine")
     return sum1.select(to_json(struct('*')).alias("json")).collect()
 
@@ -265,6 +284,8 @@ if __name__ == '__main__':
     df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
     df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
 
+    df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
+
     averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
     df = df.join(averaged,
                   (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
@@ -300,6 +321,13 @@ if __name__ == '__main__':
     sum1.show()
     # query sul carbon_intensity stato/sottostati
     sum1 = df1.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato', 'stato_maggiore', 'total_emissions').groupBy('stato', 'stato_maggiore').avg().groupBy(
+        'stato_maggiore').sum().sort(col('sum(avg(total_emissions))').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato', 'total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
     sum1.show()
 
 
