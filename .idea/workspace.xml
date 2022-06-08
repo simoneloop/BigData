@@ -20,7 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89e562ba-9df4-438e-94a2-9984dc1b691c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/BigData.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BigData.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/spark-view/angular.json" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/spark-view/angular.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/spark-view/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/spark-view/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/spark-view/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/spark-view/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/spark-view/src/app/app.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/spark-view/src/app/app.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Angular/spark-view/src/app/app.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/Angular/spark-view/src/app/app.component.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/server_spark.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/server_spark.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -179,6 +186,7 @@
       <workItem from="1653901299577" duration="571000" />
       <workItem from="1654673953718" duration="8622000" />
       <workItem from="1654684499405" duration="5147000" />
+      <workItem from="1654718370008" duration="2178000" />
     </task>
     <servers />
   </component>
@@ -206,29 +214,29 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="543" y="178" key="FileChooserDialogImpl/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1652289226822" />
-    <state width="1301" height="329" key="GridCell.Tab.0.bottom" timestamp="1654696701245">
+    <state width="1301" height="280" key="GridCell.Tab.0.bottom" timestamp="1654720822158">
       <screen x="-1680" y="27" width="1344" height="800" />
     </state>
-    <state width="1301" height="329" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654696701245" />
-    <state width="723" height="392" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654696203657" />
+    <state width="1301" height="280" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654720822158" />
+    <state width="1493" height="173" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654718672908" />
     <state width="1493" height="197" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1301" height="329" key="GridCell.Tab.0.center" timestamp="1654696701244">
+    <state width="1301" height="280" key="GridCell.Tab.0.center" timestamp="1654720822158">
       <screen x="-1680" y="27" width="1344" height="800" />
     </state>
-    <state width="1301" height="329" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654696701244" />
-    <state width="723" height="392" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654696203657" />
+    <state width="1301" height="280" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654720822158" />
+    <state width="1493" height="173" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654718672907" />
     <state width="1493" height="197" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1301" height="329" key="GridCell.Tab.0.left" timestamp="1654696701244">
+    <state width="1301" height="280" key="GridCell.Tab.0.left" timestamp="1654720822157">
       <screen x="-1680" y="27" width="1344" height="800" />
     </state>
-    <state width="1301" height="329" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654696701244" />
-    <state width="723" height="392" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654696203657" />
+    <state width="1301" height="280" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654720822157" />
+    <state width="1493" height="173" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654718672907" />
     <state width="1493" height="197" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
-    <state width="1301" height="329" key="GridCell.Tab.0.right" timestamp="1654696701244">
+    <state width="1301" height="280" key="GridCell.Tab.0.right" timestamp="1654720822158">
       <screen x="-1680" y="27" width="1344" height="800" />
     </state>
-    <state width="1301" height="329" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654696701244" />
-    <state width="723" height="392" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654696203657" />
+    <state width="1301" height="280" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654720822158" />
+    <state width="1493" height="173" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1654718672907" />
     <state width="1493" height="197" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1653263494969" />
     <state width="1470" height="261" key="GridCell.Tab.1.bottom" timestamp="1653757066154">
       <screen x="0" y="0" width="1536" height="824" />
@@ -258,7 +266,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/BigData$spark_coreprova.coverage" NAME="spark_coreprova Coverage Results" MODIFIED="1653762382461" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/BigData$spark_core.coverage" NAME="spark_core Coverage Results" MODIFIED="1653757249188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/BigData$server_spark.coverage" NAME="server_spark Coverage Results" MODIFIED="1654696701233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
+    <SUITE FILE_PATH="coverage/BigData$server_spark.coverage" NAME="server_spark Coverage Results" MODIFIED="1654720822140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/BigData$prova.coverage" NAME="prova Coverage Results" MODIFIED="1653228495377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -79,7 +79,8 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "spark-view:build"
+            "browserTarget": "spark-view:build",
+            "proxyConfig": "src/proxy.conf.json"
           }
         },
         "test": {

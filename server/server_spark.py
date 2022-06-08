@@ -52,6 +52,7 @@ class SparkServer(BaseHTTPRequestHandler):
         if(service_address in ALL_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin','*')
             self.end_headers()
 
             if service_address =='func1':
@@ -93,7 +94,7 @@ class SparkServer(BaseHTTPRequestHandler):
             self.send_response(404)
 
 def main():
-    # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     print("Run Spark")
     spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
 
