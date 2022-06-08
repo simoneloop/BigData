@@ -12,7 +12,7 @@ from pyspark.sql.types import FloatType
 from pyspark.sql.types import DoubleType
 
 n_core = multiprocessing.cpu_count()
-path = "./statesCSV"
+path = "../statesCSV"
 
 precedent_dates_filters=None
 new_date_filter=None
@@ -211,12 +211,41 @@ def query_fonte(df, fonti):
 
     return df.select(*col_selezionate)
 
+def prova():
+    print("INIZIO")
+
+    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
+    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
+
+    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+
+    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
+    df = df.join(averaged,
+                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
+
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+
+    df1 = df.cache()
+
+    sum1 = df1.select('stato', 'stato_maggiore', 'total_production').groupBy('stato', 'stato_maggiore').avg().groupBy(
+        'stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
+    print("fine")
+    sum1.show()
+    return sum1.toJSON()
 
 if __name__ == '__main__':
     print("INIZIO")
 
     spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
-
 
     #print(spark.getActiveSession())
 
