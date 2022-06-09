@@ -79,13 +79,13 @@ class SparkServer(BaseHTTPRequestHandler):
             elif (service_address == "init"):
                 map = {}
                 tmp=[]
-                stati = df1.select('stato').distinct().collect()
+                stati = df1.select('stato_maggiore').distinct().collect()
                 for s in stati:
                     tmp.append(s[0])
                 map['stati'] = tmp
 
                 tmp = []
-                stati_sottostati = df1.select('stato_maggiore').distinct().collect()
+                stati_sottostati = df1.select('stato').distinct().collect()
                 for s in  stati_sottostati:
                     tmp.append(s[0])
                 map['stati_sottostati'] = tmp
@@ -93,8 +93,8 @@ class SparkServer(BaseHTTPRequestHandler):
                 inizio = df1.select(first('timestamp')).collect()
                 fine = df1.select(last('timestamp')).collect()
 
-                map['start_time'] = inizio
-                map['end_time'] = fine
+                map['start_time'] = inizio[0]
+                map['end_time'] = fine[0]
                 map['fonti']=fonti
                 self.wfile.write(json.dumps(map).encode())
         else:
@@ -102,31 +102,31 @@ class SparkServer(BaseHTTPRequestHandler):
 
 def main():
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # print("Run Spark")
-    # spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
-    #
-    # df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
-    #
-    # df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-    #
-    # df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
-    # df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
-    #
-    # averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
-    # df = df.join(averaged,
-    #              (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
-    #              "inner").drop(df.timestamp).drop(df.stato_maggiore)
-    #
-    # df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
-    #
-    # df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-    #
-    # df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
-    #
-    # df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-    # global df1
-    # df1 = df.cache()
-    # df1.count()
+    print("Run Spark")
+    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
+    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
+
+    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+
+    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+    df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
+
+    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
+    df = df.join(averaged,
+                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
+
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    global df1
+    df1 = df.cache()
+    df1.count()
 
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     server_address=(HOST,PORT)
