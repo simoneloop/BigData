@@ -352,7 +352,8 @@
 
   <app-charts></app-charts>
   <h1>Proviamo un po' di richieste</h1>
-  <button (click)="getPosts()">CLICCAMI</button>
+  <button (click)="getJson()">CLICCAMI</button>
+  <div >{{ res | async }}</div>
 </div>
 
 <router-outlet></router-outlet>

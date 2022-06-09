@@ -9,14 +9,19 @@ import { debuglog } from 'util';
 })
 export class AppComponent {
   title = 'spark-view';
+
   readonly ROOT_URL='http://localhost:8080';
-  readonly FUNC1="/func2"
-  posts:any;
+  readonly FUNC1="/func1"
+  readonly FUNC2="/func2"
+  readonly FUNC3="/func3"
+  res:any;
+
+  response:any;
   constructor(private http:HttpClient){}
 
-  getPosts(){
+  getJson(){
     let params=new HttpParams().set("ciao","ciccio");
-    this.http.get(this.ROOT_URL+"/api"+this.FUNC1,{params}).subscribe(data => console.log(data));
+    this.http.get(this.ROOT_URL+"/api"+this.FUNC1,{params}).subscribe(data => {this.response=data;this.res="ciao"});
   }
 
 
