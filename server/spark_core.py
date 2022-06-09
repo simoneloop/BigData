@@ -377,7 +377,7 @@ def potenzaMediaInstallataPerFonti(df,params):
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
-def emissioniMediaInstallataPerFonti(df,params):
+def emissioniMediaCO2eqMinutoPerFonti(df,params):
 
     seleziona= params['tipo']
     stati = params['stati']
@@ -401,6 +401,37 @@ def emissioniMediaInstallataPerFonti(df,params):
     elif(seleziona=='stati_maggiore'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+
+
+def xyz(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+    fonti = params['fonti']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    f=[]
+    f.append('timestamp')
+    f.append('stato')
+    f.append('stato_maggiore')
+    for i in fonti:
+        f.append(i+'_production')
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select(*f)
 
 
     return x.select(to_json(struct('*')).alias("json")).collect()
