@@ -18,7 +18,7 @@ HOST='localhost'
 PORT=8080
 REQUEST_FILTER_ONE='func1'
 
-ALL_FUNC=['func1','func2','func3','init']
+ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh']
 
 def get_params(path):
 
@@ -97,6 +97,11 @@ class SparkServer(BaseHTTPRequestHandler):
                 map['end_time'] = fine[0]
                 map['fonti']=fonti
                 self.wfile.write(json.dumps(map).encode())
+            elif (service_address == "migliorRapportoCo2Kwh"):
+                print("CIAO")
+                rows = miglior_RapportoCo2_Kwh_stato_maggiore(df1,params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
         else:
             self.send_response(404)
 
@@ -124,6 +129,8 @@ def main():
     df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
 
     df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union])
     global df1
     df1 = df.cache()
     df1.count()

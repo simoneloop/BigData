@@ -55,10 +55,10 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
 col_union=[]
 for i in col_classic:
     col_union.append(i)
-    for j in col_pro:
-        if(j.find(i) != -1):
+    #for j in col_pro:
+        #if(j.find(i) != -1):
             #col_union.append(j)
-            break
+            #break
 
 
 def get_sum_import_export(x):
@@ -204,10 +204,11 @@ fasce_MPSN=['mattina','pomeriggio','sera','notte']
 def query_timestamp(df, giorni):
     tmp=None
     for i in giorni:
+        j=int(i)
         if(tmp):
-            tmp=tmp.union(df.filter(df['timestamp_inSeconds']>=i).filter(df['timestamp_inSeconds']<i+millis_day))
+            tmp=tmp.union(df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day))
         else:
-            tmp=df.filter(df['timestamp_inSeconds']>=i).filter(df['timestamp_inSeconds']<i+millis_day)
+            tmp=df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day)
     return tmp
 
 def query_fascia_oraria(df, fasce):
@@ -223,6 +224,13 @@ def query_stati(df, stati):
         stati_tmp.append('stato="'+s+'"')
 
     return df.filter(" or ".join(stati_tmp))
+
+def query_stati_maggiore(df, stati):
+    stati_maggiore_tmp=[]
+    for s in stati:
+        stati_maggiore_tmp.append('stato_maggiore="'+s+'"')
+    print(stati_maggiore_tmp)
+    return df.filter(" or ".join(stati_maggiore_tmp))
 
 
 def query_fonte(df, fonti):
@@ -244,6 +252,35 @@ def prova(df1):
     print("fine")
     return sum1.select(to_json(struct('*')).alias("json")).collect()
 
+
+def miglior_RapportoCo2_Kwh_stato_maggiore(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+
+
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+
+#def miglior_RapportoCo2_Kwh_stato(df) :
+
+    #x = df.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+
+    #return x.select(to_json(struct('*')).alias("json")).collect()
 
 
 if __name__ == '__main__':
