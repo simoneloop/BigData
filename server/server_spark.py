@@ -95,7 +95,6 @@ class SparkServer(BaseHTTPRequestHandler):
 
 def main():
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-<<<<<<< HEAD
     # print("Run Spark")
     # spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
     #
