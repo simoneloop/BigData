@@ -21,12 +21,15 @@ REQUEST_FILTER_ONE='func1'
 ALL_FUNC=['func1','func2','func3','init']
 
 def get_params(path):
+
     if('?' in path):
         param=path.split('?')[1]
+       
         params=param.split("&")
         res={}
         for p in params:
             tmp=p.split("=")
+
             if("[" in tmp[1] or "]" in tmp[1]):
                 list=tmp[1].strip('][').split(',')
                 res[tmp[0]]=list
@@ -40,6 +43,8 @@ def get_service_address(path):
     serviceAddress=path
     if ('?' in path) :
         serviceAddress=path.split("?")[0]
+        serviceAddress = serviceAddress.split("/")
+        serviceAddress = serviceAddress[len(serviceAddress) - 2]
 
     serviceAddress = serviceAddress.split("/")
     serviceAddress = serviceAddress[len(serviceAddress) - 1]
@@ -49,6 +54,8 @@ class SparkServer(BaseHTTPRequestHandler):
     def do_GET(self):
         params=get_params(self.path)
         service_address=get_service_address(self.path)
+        print(params)
+        print(service_address)
         if(service_address in ALL_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
