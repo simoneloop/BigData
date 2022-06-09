@@ -20,8 +20,27 @@ export class AppComponent {
   constructor(private http:HttpClient){}
 
   getJson(){
-    let params=new HttpParams().set("ciao","ciccio");
-    this.http.get(this.ROOT_URL+"/api"+this.FUNC1,{params}).subscribe(data => {this.response=data;});
+    let params = new Map<string, any>();
+    params.set("field1",'ciccio');
+    params.set('field2',"ciao")
+    let httpParams=this.getParams(params)
+    /* let fParams=undefined; */
+    /* let httpParams = new HttpParams();
+    params.forEach((value, key) => { httpParams=httpParams.set(key,value) } )
+    console.log(httpParams) */
+    let url=this.ROOT_URL+this.FUNC1+(httpParams?"/?"+httpParams:"")
+    if(httpParams)url=url.substring(0,url.length-1)
+    this.http.get(url).subscribe(data => {this.response=data;console.log(this.response)});
+  }
+
+  getParams(params:Map<String,any>){
+    let res="";
+    if(params && params.size>0){
+      params.forEach((value, key) => { res+=key+"="+value+"&" } );
+      return res;
+    }
+    else{return undefined;}
+
   }
 
 
