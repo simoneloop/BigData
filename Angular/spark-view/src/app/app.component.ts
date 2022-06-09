@@ -21,7 +21,7 @@ export class AppComponent {
 
   getJson(){
     let params=new HttpParams().set("ciao","ciccio");
-    this.http.get(this.ROOT_URL+"/api"+this.FUNC1,{params}).subscribe(data => {this.response=data;this.res="ciao"});
+    this.http.get(this.ROOT_URL+"/api"+this.FUNC1,{params}).subscribe(data => {this.response=data;});
   }
 
 
