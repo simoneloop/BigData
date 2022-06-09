@@ -121,33 +121,6 @@ def main():
     # global df1
     # df1 = df.cache()
     # df1.count()
-=======
-    print("Run Spark")
-    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
-
-    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
-
-    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-
-    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
-    df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
-
-    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
-    df = df.join(averaged,
-                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
-                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
-
-    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
-
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
-
-    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
-
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
-    global df1
-    df1 = df.cache()
-    df1.count()
->>>>>>> 573e394cc9f0173d3b1eb5c8b9fd4970f69cbdc4
 
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     server_address=(HOST,PORT)
