@@ -18,7 +18,7 @@ HOST='localhost'
 PORT=8080
 REQUEST_FILTER_ONE='func1'
 
-ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh']
+ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti','potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti']
 
 def get_params(path):
 
@@ -98,10 +98,30 @@ class SparkServer(BaseHTTPRequestHandler):
                 map['fonti']=fonti
                 self.wfile.write(json.dumps(map).encode())
             elif (service_address == "migliorRapportoCo2Kwh"):
-                print("CIAO")
-                rows = miglior_RapportoCo2_Kwh_stato_maggiore(df1,params)
+                rows = migliorRapportoCo2Kwh(df1,params)
                 files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
+            elif (service_address == 'potenzaMediaKW'):
+                rows = potenzaMediaKW(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "emissioniMediaCO2eqMinuto"):
+                rows = emissioniMediaCO2eqMinuto(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaMediaUtilizzataPerFonti"):
+                rows = potenzaMediaUtilizzataPerFonti(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaMediaInstallataPerFonti") :
+                rows = potenzaMediaInstallataPerFonti(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "emissioniMediaCO2eqMinutoPerFonti") :
+                rows = emissioniMediaCO2eqMinutoPerFonti(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+
         else:
             self.send_response(404)
 

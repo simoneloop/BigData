@@ -202,14 +202,18 @@ millis_day=86400
 fasce_MPSN=['mattina','pomeriggio','sera','notte']
 
 def query_timestamp(df, giorni):
-    tmp=None
-    for i in giorni:
-        j=int(i)
-        if(tmp):
-            tmp=tmp.union(df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day))
-        else:
-            tmp=df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day)
-    return tmp
+
+    if giorni:
+        tmp = None
+        for i in giorni:
+            j=int(i)
+            if(tmp):
+                tmp=tmp.union(df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day))
+            else:
+                tmp=df.filter(df['timestamp_inSeconds']>=j).filter(df['timestamp_inSeconds']<j+millis_day)
+        return tmp
+    else:
+        return df
 
 def query_fascia_oraria(df, fasce):
     fasce_tmp = []
@@ -229,7 +233,6 @@ def query_stati_maggiore(df, stati):
     stati_maggiore_tmp=[]
     for s in stati:
         stati_maggiore_tmp.append('stato_maggiore="'+s+'"')
-    print(stati_maggiore_tmp)
     return df.filter(" or ".join(stati_maggiore_tmp))
 
 
@@ -253,7 +256,7 @@ def prova(df1):
     return sum1.select(to_json(struct('*')).alias("json")).collect()
 
 
-def miglior_RapportoCo2_Kwh_stato_maggiore(df,params):
+def migliorRapportoCo2Kwh(df,params):
 
     seleziona= params['tipo']
     stati = params['stati']
@@ -271,17 +274,136 @@ def miglior_RapportoCo2_Kwh_stato_maggiore(df,params):
         x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
 
 
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+
+def potenzaMediaKW(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
 
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
 
-#def miglior_RapportoCo2_Kwh_stato(df) :
+def emissioniMediaCO2eqMinuto(df,params):
 
-    #x = df.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
 
-    #return x.select(to_json(struct('*')).alias("json")).collect()
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
 
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select('stato','stato_maggiore','total_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_emissions))').desc())
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select('stato','total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+
+def potenzaMediaUtilizzataPerFonti(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+    fonti = params['fonti']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    f=[]
+    f.append('stato')
+    f.append('stato_maggiore')
+    for i in fonti:
+        f.append(i+'_production')
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select(*f).groupBy('stato').avg()
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+def potenzaMediaInstallataPerFonti(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+    fonti = params['fonti']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    f=[]
+    f.append('stato')
+    f.append('stato_maggiore')
+    for i in fonti:
+        f.append(i+'_installed_capacity')
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select(*f).groupBy('stato').avg()
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+def emissioniMediaInstallataPerFonti(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+    fonti = params['fonti']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    f=[]
+    f.append('stato')
+    f.append('stato_maggiore')
+    for i in fonti:
+        f.append(i+'_emissions')
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+    elif(seleziona=='stati_maggiore'):
+        df3 = query_stati(df2, stati)
+        x = df3.select(*f).groupBy('stato').avg()
+
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
 
 if __name__ == '__main__':
     print("INIZIO")
