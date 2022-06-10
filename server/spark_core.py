@@ -269,7 +269,7 @@ def migliorRapportoCo2Kwh(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
 
@@ -291,7 +291,7 @@ def potenzaMediaKW(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
 
@@ -313,7 +313,7 @@ def emissioniMediaCO2eqMinuto(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select('stato','stato_maggiore','total_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_emissions))').desc())
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato','total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
 
@@ -342,7 +342,7 @@ def potenzaMediaUtilizzataPerFonti(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
 
@@ -370,7 +370,7 @@ def potenzaMediaInstallataPerFonti(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
 
@@ -398,7 +398,7 @@ def emissioniMediaCO2eqMinutoPerFonti(df,params):
         df3= query_stati_maggiore(df2,stati)
         x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
 
@@ -420,19 +420,23 @@ def xyz(df,params):
 
     f=[]
     f.append('timestamp')
-    f.append('stato')
-    f.append('stato_maggiore')
+
+    if (seleziona == 'stati') :
+        f.append('stato_maggiore')
+    elif (seleziona == 'sotto_stati'):
+        f.append('stato')
     for i in fonti:
         f.append(i+'_production')
 
     if(seleziona=='stati'):
         df3= query_stati_maggiore(df2,stati)
-        x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
+        x = df3.select(*f).groupBy('timestamp','stato_maggiore').sum()
 
-    elif(seleziona=='stati_maggiore'):
+    elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f)
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
