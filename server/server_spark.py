@@ -18,7 +18,9 @@ HOST='localhost'
 PORT=8080
 REQUEST_FILTER_ONE='func1'
 
-ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti','potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','xyz']
+ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti',
+          'potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','distribuzioneDellaPotenzaDisponibileNelTempo','potenzaInEsportazioneMedia',
+          'potenzaInImportazioneMedia']
 
 def get_params(path):
 
@@ -121,10 +123,19 @@ class SparkServer(BaseHTTPRequestHandler):
                 rows = emissioniMediaCO2eqMinutoPerFonti(df1, params)
                 files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
-            elif (service_address == "xyz") :
-                rows = xyz(df1, params)
+            elif (service_address == "distribuzioneDellaPotenzaDisponibileNelTempo") :
+                rows = distribuzioneDellaPotenzaDisponibileNelTempo(df1, params)
                 files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaInEsportazioneMedia") :
+                rows = potenzaInEsportazioneMedia(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaInImportazioneMedia") :
+                rows = potenzaInImportazioneMedia(df1, params)
+                files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+
 
         else:
             self.send_response(404)

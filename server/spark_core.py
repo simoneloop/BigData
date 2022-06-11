@@ -38,9 +38,11 @@ col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_inte
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
                'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
 
+col_union=col_classic
+
 fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio',
          'sconosciuto']
-
+'''
 col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
                  'sum(geotermico_emissions)','sum(biomassa_installed_capacity)','sum(biomassa_production)','sum(biomassa_emissions)',
@@ -51,15 +53,7 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
                  'sum(batterieaccu_production)','sum(batterieaccu_emissions)','sum(gas_installed_capacity)','sum(gas_production)','sum(gas_emissions)',
                  'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
                  'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
-
-col_union=[]
-for i in col_classic:
-    col_union.append(i)
-    #for j in col_pro:
-        #if(j.find(i) != -1):
-            #col_union.append(j)
-            #break
-
+'''
 
 def get_sum_import_export(x):
     sum= 0
@@ -272,7 +266,8 @@ def migliorRapportoCo2Kwh(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
@@ -294,7 +289,8 @@ def potenzaMediaKW(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
@@ -316,7 +312,8 @@ def emissioniMediaCO2eqMinuto(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select('stato','total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
@@ -345,7 +342,8 @@ def potenzaMediaUtilizzataPerFonti(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
@@ -373,7 +371,8 @@ def potenzaMediaInstallataPerFonti(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
@@ -401,13 +400,14 @@ def emissioniMediaCO2eqMinutoPerFonti(df,params):
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
         x = df3.select(*f).groupBy('stato').avg()
-
+    else:
+        return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
 
 
 
-def xyz(df,params):
+def distribuzioneDellaPotenzaDisponibileNelTempo(df,params):
 
     seleziona= params['tipo']
     stati = params['stati']
@@ -430,7 +430,7 @@ def xyz(df,params):
 
     if(seleziona=='stati'):
         df3= query_stati_maggiore(df2,stati)
-        x = df3.select(*f).groupBy('timestamp','stato_maggiore').sum()
+        x = df3.select(*f).groupBy('timestamp','stato_maggiore').sum()#problema ordinamento?
 
     elif(seleziona=='sotto_stati'):
         df3 = query_stati(df2, stati)
@@ -439,6 +439,51 @@ def xyz(df,params):
         return []
 
     return x.select(to_json(struct('*')).alias("json")).collect()
+
+def potenzaInEsportazioneMedia(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select('stato','stato_maggiore','sum_export').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export))').desc())
+        #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+    elif(seleziona=='sotto_stati'):
+        df3 = query_stati(df2, stati)
+        x = df3.select('stato','sum_export').groupBy('stato').avg().sort(col('avg(sum_export)').desc())
+    else:
+        return []
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
+def potenzaInImportazioneMedia(df,params):
+
+    seleziona= params['tipo']
+    stati = params['stati']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    if(seleziona=='stati'):
+        df3= query_stati_maggiore(df2,stati)
+        x = df3.select('stato','stato_maggiore','sum_import').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import))').desc())
+        #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+    elif(seleziona=='sotto_stati'):
+        df3 = query_stati(df2, stati)
+        x = df3.select('stato','sum_import').groupBy('stato').avg().sort(col('avg(sum_import)').desc())
+    else:
+        return []
+
+    return x.select(to_json(struct('*')).alias("json")).collect()
+
 
 if __name__ == '__main__':
     print("INIZIO")
