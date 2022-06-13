@@ -43,7 +43,7 @@ if __name__=='__main__':
                 res.append(map)
             j=j-1
         i=i+1
-    print(res)
+
     print(res)
     '''
     
