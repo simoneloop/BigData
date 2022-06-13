@@ -44,7 +44,7 @@ if __name__=='__main__':
             j=j-1
         i=i+1
     print(res)
-
+    print(res)
     '''
     
     for i in range(img_b.shape[0]):
