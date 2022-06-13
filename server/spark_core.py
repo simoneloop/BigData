@@ -267,10 +267,13 @@ def migliorRapportoCo2Kwh(df,params):
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
             x = df3.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
-
+            x = x.select(col('stato_maggiore').alias('stato'),col("avg(carbon_intensity)").alias('value'))
+            x = x.withColumn("label",lit('avg(carbon_intensity)'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+            x = x.select(col('stato'), col("avg(carbon_intensity)").alias('value'))
+            x = x.withColumn("label", lit('avg(carbon_intensity)'))
         else:
             return 'bad request'
 
