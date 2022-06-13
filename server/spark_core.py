@@ -509,32 +509,137 @@ def potenzaInImportazioneMedia(df,params):
 
 
 def creazioneFile():
-    path = "./states"
-
+    path = "../states"
+    path1 = "../statesCSV/"
     print(os.listdir(path))
-
+    print(os.listdir(path1))
     for f in os.listdir(path) :
         print(f)
         xcel = pd.read_excel(path + "/" + f)
         f = f.split(".")[0]
         xcel["stato"] = f
 
-        xcel.to_csv("./statesCSV/" + f + ".csv", index=False)
+        xcel.to_csv(path1 + f + ".csv", index=False)
 
     df = 0
     count = 0
-    path1 = "./statesCSV/"
-    print(os.listdir(path1))
+
     for f in os.listdir(path1) :
         if (count == 0) :
             df = pd.read_csv(path1 + f)
             count = 1
         else :
             df = pd.concat([df, pd.read_csv(path1 + f)])
-    #df.to_csv(path1 + "totalStates" + ".csv", index=False)
+    df.to_csv(path1 + "totalStates" + ".csv", index=False)
 
 if __name__ == '__main__':
-    creazioneFile()
+    print("INIZIO")
+
+    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+
+    #print(spark.getActiveSession())
+
+
+    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
+
+    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+
+    df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
+
+    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
+    df = df.join(averaged,
+                  (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                  "inner").drop(df.timestamp).drop(df.stato_maggiore)
+
+    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+
+    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+
+    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    #df.filter(df['timestamp'] == "19:00 20-04-2022").filter(df['stato_maggiore'] == "Italia").show()
+
+
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"),*col_union])
+
+    print("siamo qua 1")
+    start = time.time()
+    df1 = df.cache()
+    df1.count()
+    print("Tempo di cache = ",time.time() - start)
+
+    start = time.time()
+    sum1= df1.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
+    sum1.show()
+
+    #query sul carbon_intensity stato intero
+    sum1 = df1.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
+    sum1.show()
+    # query sul carbon_intensity stato/sottostati
+    sum1 = df1.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato', 'stato_maggiore', 'total_emissions').groupBy('stato', 'stato_maggiore').avg().groupBy(
+        'stato_maggiore').sum().sort(col('sum(avg(total_emissions))').desc())
+    sum1.show()
+
+    sum1 = df1.select('stato', 'total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
+    sum1.show()
+
+
+    sum1 = df1.select('timestamp', 'fotovoltaico_production').groupBy('timestamp').sum()
+    sum1.show()
+    print("Tempo = ", time.time() - start)
+
+
+
+    '''
+    df1.show()
+    print(df1.count())
+
+    print("siamo qua 2")
+    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_import)").show()
+    df1.filter(df1['timestamp'] == "19:00 20-04-2022").filter(df1['stato_maggiore'] == "Italia").select("sum(sum_export)").show()
+    print("siamo qua 3")
+    #print(df1.describe())
+    #df1.show()
+    #df.show(300)
+
+    #print(df.count())
+
+    print(df1.filter(df1['carbon_intensity']>300).count())
+    print(df1.filter(df1['carbon_intensity']<200).count())
+
+    x=[1650492000,1650578400]
+    df1=query_timestamp(df,x)
+
+    y=['mattina','pomeriggio','sera','notte']
+    df1=query_fascia_oraria(df1,y)
+
+
+    stati=["Austria","Francia","Danimarca orientale (Danimarca)"]
+
+    df1=query_stati(df1,stati).select('stato').distinct().show()
+    fonti=['nucleare','geotermico']
+
+    time.sleep(10000)
+    df1=query_fonte(df,fonti)
+    df1.show(300)
+
+    df1.filter(df['stato_maggiore']=='Italia').dropDuplicates((['stato'])).show(300)
+
+    #print("...",df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).count())
+    #df.filter(df['timestamp_inMillis'] >= x).filter(df['timestamp_inMillis'] <= y).show()
+    #df.show(300)
+
+    #time.sleep(10000)
+    print("FINE")
+    '''
 
 
 
