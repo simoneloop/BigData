@@ -24,23 +24,24 @@ ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh','potenzaMediaKW
           'potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','distribuzioneDellaPotenzaDisponibileNelTempo','potenzaInEsportazioneMedia',
           'potenzaInImportazioneMedia']
 
-def get_params(path):
 
-    if('?' in path):
-        param=path.split('?')[1]
-       
-        params=param.split("&")
-        res={}
-        for p in params:
-            tmp=p.split("=")
+def get_params(path) :
+    path = path.replace("%", " ")
+    if ('?' in path) :
+        param = path.split('?')[1]
 
-            if("[" in tmp[1] or "]" in tmp[1]):
-                list=tmp[1].strip('][').split(',')
-                res[tmp[0]]=list
-            else:
-                res[tmp[0]]=tmp[1]
+        params = param.split("&")
+        res = {}
+        for p in params :
+            tmp = p.split("=")
+
+            if ("[" in tmp[1] or "]" in tmp[1]) :
+                list = tmp[1].strip('][').split(',')
+                res[tmp[0]] = list
+            else :
+                res[tmp[0]] = tmp[1]
         return res
-    else:
+    else :
         return None
 
 def get_service_address(path):
