@@ -13,6 +13,8 @@ from http.server import HTTPServer,BaseHTTPRequestHandler
 import json
 from spark_core import *
 
+bad_request={}
+bad_request['error']='bad request'
 
 HOST='localhost'
 PORT=8080
@@ -92,8 +94,8 @@ class SparkServer(BaseHTTPRequestHandler):
                     tmp.append(s[0])
                 map['stati_sottostati'] = tmp
 
-                inizio = df1.select(first('timestamp')).collect()
-                fine = df1.select(last('timestamp')).collect()
+                inizio = df1.select(first('timestamp_inSeconds')).collect()
+                fine = df1.select(last('timestamp_inSeconds')).collect()
 
                 map['start_time'] = inizio[0]
                 map['end_time'] = fine[0]
@@ -101,39 +103,67 @@ class SparkServer(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(map).encode())
             elif (service_address == "migliorRapportoCo2Kwh"):
                 rows = migliorRapportoCo2Kwh(df1,params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
+
             elif (service_address == 'potenzaMediaKW'):
                 rows = potenzaMediaKW(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "emissioniMediaCO2eqMinuto"):
                 rows = emissioniMediaCO2eqMinuto(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "potenzaMediaUtilizzataPerFonti"):
                 rows = potenzaMediaUtilizzataPerFonti(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "potenzaMediaInstallataPerFonti") :
                 rows = potenzaMediaInstallataPerFonti(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "emissioniMediaCO2eqMinutoPerFonti") :
                 rows = emissioniMediaCO2eqMinutoPerFonti(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "distribuzioneDellaPotenzaDisponibileNelTempo") :
                 rows = distribuzioneDellaPotenzaDisponibileNelTempo(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "potenzaInEsportazioneMedia") :
                 rows = potenzaInEsportazioneMedia(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
             elif (service_address == "potenzaInImportazioneMedia") :
                 rows = potenzaInImportazioneMedia(df1, params)
-                files = [json.loads(row[0]) for row in rows]
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
 
 
