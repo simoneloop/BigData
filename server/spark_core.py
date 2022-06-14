@@ -53,6 +53,18 @@ col_union    = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_int
                'exchange_export','sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
                'exchange_import','sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
 
+col_union_new= ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','total_production','total_emissions','consumo',
+               'nucleare_installed_capacity','nucleare_production','nucleare_emissions',
+               'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
+               'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
+               'eolico_emissions','fotovoltaico_installed_capacity','fotovoltaico_production','fotovoltaico_emissions','idroelettrico_installed_capacity',
+               'idroelettrico_production','idroelettrico_emissions','accumuloidro_installed_capacity','accumuloidro_production','accumuloidro_emissions',
+               'batterieaccu_installed_capacity','batterieaccu_production','batterieaccu_emissions','gas_installed_capacity','gas_production',
+               'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
+               'sconosciuto_production','sconosciuto_emissions',
+               'sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
+               'sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
+
 
 fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
 '''
