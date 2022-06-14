@@ -247,7 +247,7 @@ def server():
     #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
     #todo Gestione timestamp in secondi
-    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union])
+    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union_new])
     #todo Gestione timestamp in secondi
 
     #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
