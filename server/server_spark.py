@@ -238,6 +238,8 @@ def server():
 
     df = df.withColumn("sum_export_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
 
+    df = df.withColumn("consumo_stato_maggiore", map_consumo(df['total_production'], df['sum_import_stato_maggiore'], df['sum_export_stato_maggiore'],df['stato_maggiore']))
+
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union])
     #df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds")])
     global df1

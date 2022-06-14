@@ -23,10 +23,13 @@ new_date_filter=None
 stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
+
 sum_import_export=udf(lambda x: get_sum_import_export(x), FloatType())
 sum_import_export_stato_maggiore=udf(lambda x,y: get_sum_import_export_stato_maggiore(x,y), FloatType())
+
 sum_import_export_emissions=udf(lambda x: get_sum_import_export_emissions(x), FloatType())
 sum_import_export_emissions_stato_maggiore=udf(lambda x,y: get_sum_import_export_emissions_stato_maggiore(x,y), FloatType())
+
 repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatType())
 repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
