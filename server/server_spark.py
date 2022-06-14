@@ -20,9 +20,9 @@ HOST='localhost'
 PORT=8080
 REQUEST_FILTER_ONE='func1'
 
-ALL_FUNC=['func1','func2','func3','init','migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti',
+ALL_FUNC=['func1','params','init','migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti',
           'potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','distribuzioneDellaPotenzaDisponibileNelTempo','potenzaInEsportazioneMedia',
-          'potenzaInImportazioneMedia']
+          'potenzaInImportazioneMedia','potenzaMediaDisponibileNelloStatoKW','emissioniInEsportazioneMedia','emissioniInImportazioneMedia']
 
 
 def get_params(path) :
@@ -59,8 +59,10 @@ class SparkServer(BaseHTTPRequestHandler):
     def do_GET(self):
         params=get_params(self.path)
         service_address=get_service_address(self.path)
+
         print(params)
         print(service_address)
+
         if(service_address in ALL_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
@@ -73,13 +75,10 @@ class SparkServer(BaseHTTPRequestHandler):
                 map['hello']="world";
                 response=json.dumps(map)
                 self.wfile.write(response.encode())
-            elif(service_address=="func2"):
+
+            elif(service_address=="params"):
                 response=json.dumps(params)
                 self.wfile.write(response.encode())
-            elif(service_address=="func3"):
-                rows=prova(df1)
-                files = [json.loads(row[0]) for row in rows]
-                self.wfile.write(json.dumps(files).encode())
 
             elif (service_address == "init"):
                 map = {}
@@ -166,22 +165,52 @@ class SparkServer(BaseHTTPRequestHandler):
                 else:
                     files = [json.loads(row[0]) for row in rows]
                 self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaMediaDisponibileNelloStatoKW") :
+                rows = potenzaMediaDisponibileNelloStatoKW(df1, params)
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "potenzaMediaDisponibileNelloStatoKW") :
+                rows = potenzaMediaDisponibileNelloStatoKW(df1, params)
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "emissioniInEsportazioneMedia") :
+                rows = emissioniInEsportazioneMedia(df1, params)
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
+            elif (service_address == "emissioniInImportazioneMedia") :
+                rows = emissioniInImportazioneMedia(df1, params)
+                if (rows == 'bad request') :
+                    files = bad_request
+                else:
+                    files = [json.loads(row[0]) for row in rows]
+                self.wfile.write(json.dumps(files).encode())
 
 
         else:
             self.send_response(404)
 
-def main():
-    #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+def server():
+
     print("Run Spark")
     spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
 
     df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
-    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-
     df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
     df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
+
+    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
 
     averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
     df = df.join(averaged,
@@ -196,18 +225,22 @@ def main():
 
     df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
 
+    df = df.withColumn("sum_import_emissions", sum_import_export_emissions(df['exchange_import']))
+
+    df = df.withColumn("sum_export_emissions", sum_import_export_emissions(df['exchange_export']))
+
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union])
     global df1
     df1 = df.cache()
     df1.count()
 
-    #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     server_address=(HOST,PORT)
     server=HTTPServer(server_address,SparkServer)
     print('Server running on port %s' % PORT)
     server.serve_forever()
-    #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 if __name__=='__main__':
-    main()
+    server()
 

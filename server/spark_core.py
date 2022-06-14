@@ -1,35 +1,41 @@
 import findspark
 findspark.init()
-import time
+
 from pyspark.sql import SparkSession
-import os
-import multiprocessing
 from pyspark.sql.functions import *
 from pyspark.sql.functions import udf
-from pyspark.sql.types import StringType, DoubleType
+from pyspark.sql.types import StringType,FloatType
 from pyspark.sql.types import IntegerType
-from pyspark.sql.types import FloatType
 from pyspark.sql.types import DoubleType
-import pandas as pd
+import os
+import os.path
+import time
 
-n_core = multiprocessing.cpu_count()
+#import multiprocessing
+#n_core = multiprocessing.cpu_count()
 path = "../statesCSV"
 
 precedent_dates_filters=None
 new_date_filter=None
-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
 sum_import_export=udf(lambda x: get_sum_import_export(x), FloatType())
+sum_import_export_emissions=udf(lambda x: get_sum_import_export_emissions(x), FloatType())
 repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatType())
 repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
+
+fasce_MPSN=['mattina','pomeriggio','sera','notte']
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
 
-col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
+col_union    = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
                'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
                'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
@@ -37,12 +43,10 @@ col_classic = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_inte
                'idroelettrico_production','idroelettrico_emissions','accumuloidro_installed_capacity','accumuloidro_production','accumuloidro_emissions',
                'batterieaccu_installed_capacity','batterieaccu_production','batterieaccu_emissions','gas_installed_capacity','gas_production',
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
-               'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','exchange_import','sum_import']
+               'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','sum_export_emissions','exchange_import','sum_import','sum_import_emissions']
 
-col_union=col_classic
 
-fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio',
-         'sconosciuto']
+fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
 '''
 col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
@@ -55,7 +59,8 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
                  'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
                  'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
 '''
-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export(x):
     sum= 0
     try :
@@ -75,15 +80,40 @@ def get_sum_import_export(x):
         sum += 0
     return sum
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+def get_sum_import_export_emissions(x):
+    sum= 0
+    try :
+        n = x.split("@")
+        for i in n:
+            if (i):
+                try :
+                    value = i.split("_")[3]
+                    if (value == "nan"):
+                        value = 0
+                    sum += float(value)
+                except Exception as e:
+                    print(e)
+                    sum += 0
+    except Exception as e:
+        #print(e)
+        sum += 0
+    return sum
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*--*-*-*--*-*-*-
 def get_stato_maggiore(x):
+
     try:
         return x.split("(")[1].replace(")", "")
     except:
         return x
 
-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_fascia_oraria(x):
+
     hh = x.split(":")[0]
     hh = int(hh)
     if (hh >= 00 and hh < 6):
@@ -95,7 +125,8 @@ def get_fascia_oraria(x):
     elif (hh >= 18 and hh <= 23):
         return "sera"
 
-
+#todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_consumo(x,y,z):
 
     import_q = 0
@@ -134,6 +165,9 @@ def get_consumo(x,y,z):
 
     cont = float(x) + import_q + export_q
     return cont
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_production(x,y):
     import_q = 0
 
@@ -154,6 +188,8 @@ def get_new_total_production(x,y):
         import_q += 0
     return float(x)-import_q
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_emissions(x,y):
     import_q = 0
 
@@ -194,8 +230,6 @@ def get_new_total_emissions(x,y):
 #     pass
 #
 millis_day=86400
-fasce_MPSN=['mattina','pomeriggio','sera','notte']
-
 def query_timestamp(df, giorni):
 
     if (giorni):
@@ -234,7 +268,7 @@ def query_stati_maggiore(df, stati):
         stati_maggiore_tmp.append('stato_maggiore="'+s+'"')
     return df.filter(" or ".join(stati_maggiore_tmp))
 
-
+'''
 def query_fonte(df, fonti):
     col_selezionate = col_static
     for f in fonti :
@@ -243,17 +277,7 @@ def query_fonte(df, fonti):
         col_selezionate.append(f + "_emissions")
 
     return df.select(*col_selezionate)
-
-def prova(df1):
-    print("INIZIO")
-
-
-    sum1 = df1.select('stato', 'stato_maggiore', 'total_production').groupBy('stato', 'stato_maggiore').avg().groupBy(
-        'stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
-
-    print("fine")
-    return sum1.select(to_json(struct('*')).alias("json")).collect()
-
+'''
 
 def migliorRapportoCo2Kwh(df,params):
     try:
@@ -268,15 +292,14 @@ def migliorRapportoCo2Kwh(df,params):
             df3= query_stati_maggiore(df2,stati)
             x = df3.select('stato_maggiore', 'carbon_intensity').groupBy('stato_maggiore').avg().sort(col('avg(carbon_intensity)').desc())
             x = x.select(col('stato_maggiore').alias('stato'),col("avg(carbon_intensity)").alias('value'))
-            x = x.withColumn("label",lit('avg(carbon_intensity)'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
             x = x.select(col('stato'), col("avg(carbon_intensity)").alias('value'))
-            x = x.withColumn("label", lit('avg(carbon_intensity)'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Intensità di carbonio (gCO₂eq/kWh)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
         return 'bad request'
@@ -294,13 +317,43 @@ def potenzaMediaKW(df,params):
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
             x = df3.select('stato','stato_maggiore','total_production').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_production))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'), col("sum(avg(total_production))").alias('value'))
 
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
+            x = x.select(col('stato'), col("avg(total_production)").alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Potenza Media Prodotta (KW)'))
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except:
+        return 'bad request'
+
+def potenzaMediaDisponibileNelloStatoKW(df,params):
+    try :
+        seleziona= params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        if(seleziona=='stati'):
+            df3= query_stati_maggiore(df2,stati)
+            x = df3.select('stato','stato_maggiore','consumo').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(consumo))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'), col("sum(avg(consumo))").alias('value'))
+            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+        elif(seleziona=='sotto_stati'):
+            df3 = query_stati(df2, stati)
+            x = df3.select('stato','consumo').groupBy('stato').avg().sort(col('avg(consumo)').desc())
+            x = x.select(col('stato'), col("avg(consumo)").alias('value'))
+        else:
+            return 'bad request'
+
+        x = x.withColumn("label", lit('Potenza Media Disponibile (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
         return 'bad request'
@@ -319,13 +372,16 @@ def emissioniMediaCO2eqMinuto(df,params):
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
             x = df3.select('stato','stato_maggiore','total_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(total_emissions))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'), col('sum(avg(total_emissions))').alias('value'))
 
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
+            x = x.select(col('stato'), col('avg(total_emissions)').alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Inquinamento Medio Prodotto (Kg di CO₂eq per minuto) '))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
         return 'bad request'
@@ -485,6 +541,30 @@ def potenzaInEsportazioneMedia(df,params):
     except:
         return 'bad request'
 
+def emissioniInEsportazioneMedia(df,params):
+    try :
+        seleziona= params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        if(seleziona=='stati'):
+            df3= query_stati_maggiore(df2,stati)
+            x = df3.select('stato','stato_maggiore','sum_export_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_emissions))').desc())
+            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+        elif(seleziona=='sotto_stati'):
+            df3 = query_stati(df2, stati)
+            x = df3.select('stato','sum_export_emissions').groupBy('stato').avg().sort(col('avg(sum_export_emissions)').desc())
+        else:
+            return 'bad request'
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except:
+        return 'bad request'
+
 def potenzaInImportazioneMedia(df,params):
     try :
         seleziona= params['tipo']
@@ -509,9 +589,33 @@ def potenzaInImportazioneMedia(df,params):
     except:
         return 'bad request'
 
+def emissioniInImportazioneMedia(df,params):
+    try :
+        seleziona= params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
 
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
 
+        if(seleziona=='stati'):
+            df3= query_stati_maggiore(df2,stati)
+            x = df3.select('stato','stato_maggiore','sum_import_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import_emissions))').desc())
+            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+        elif(seleziona=='sotto_stati'):
+            df3 = query_stati(df2, stati)
+            x = df3.select('stato','sum_import_emissions').groupBy('stato').avg().sort(col('avg(sum_import_emissions)').desc())
+        else:
+            return 'bad request'
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except:
+        return 'bad request'
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def creazioneFile():
+    import pandas as pd
     path = "../states"
     path1 = "../statesCSV/"
     print(os.listdir(path))
@@ -535,7 +639,27 @@ def creazioneFile():
             df = pd.concat([df, pd.read_csv(path1 + f)])
     df.to_csv(path1 + "totalStates" + ".csv", index=False)
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+def controlloEsistenzaFile():
+
+    if os.path.isfile(path+'/totalStates.csv') :
+        print("totalStates.cvs File exist")
+    else :
+        print("File not exist")
+        print("create file...")
+        try:
+            creazioneFile()
+            print('totalStates.cvs create')
+        except:
+            print('error create totalStates.csv')
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 if __name__ == '__main__':
+    controlloEsistenzaFile()
+
+    '''
     print("INIZIO")
 
     spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
@@ -601,7 +725,7 @@ if __name__ == '__main__':
 
 
 
-    '''
+    
     df1.show()
     print(df1.count())
 
