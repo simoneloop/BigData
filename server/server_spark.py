@@ -223,13 +223,23 @@ def server():
 
     df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
 
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+    df = df.withColumn("sum_import_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
 
     df = df.withColumn("sum_import_emissions", sum_import_export_emissions(df['exchange_import']))
 
+    df = df.withColumn("sum_import_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
+
+
+    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+
+    df = df.withColumn("sum_export_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
+
     df = df.withColumn("sum_export_emissions", sum_import_export_emissions(df['exchange_export']))
 
+    df = df.withColumn("sum_export_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
+
     df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union])
+    #df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds")])
     global df1
     df1 = df.cache()
     df1.count()

@@ -10,6 +10,7 @@ from pyspark.sql.types import DoubleType
 import os
 import os.path
 import time
+import re
 
 #import multiprocessing
 #n_core = multiprocessing.cpu_count()
@@ -23,7 +24,9 @@ stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
 sum_import_export=udf(lambda x: get_sum_import_export(x), FloatType())
+sum_import_export_stato_maggiore=udf(lambda x,y: get_sum_import_export_stato_maggiore(x,y), FloatType())
 sum_import_export_emissions=udf(lambda x: get_sum_import_export_emissions(x), FloatType())
+sum_import_export_emissions_stato_maggiore=udf(lambda x,y: get_sum_import_export_emissions_stato_maggiore(x,y), FloatType())
 repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatType())
 repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
@@ -43,7 +46,9 @@ col_union    = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_int
                'idroelettrico_production','idroelettrico_emissions','accumuloidro_installed_capacity','accumuloidro_production','accumuloidro_emissions',
                'batterieaccu_installed_capacity','batterieaccu_production','batterieaccu_emissions','gas_installed_capacity','gas_production',
                'gas_emissions','petrolio_installed_capacity','petrolio_production','petrolio_emissions','sconosciuto_installed_capacity',
-               'sconosciuto_production','sconosciuto_emissions','exchange_export','sum_export','sum_export_emissions','exchange_import','sum_import','sum_import_emissions']
+               'sconosciuto_production','sconosciuto_emissions',
+               'exchange_export','sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
+               'exchange_import','sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
 
 
 fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
@@ -79,6 +84,29 @@ def get_sum_import_export(x):
         #print(e)
         sum += 0
     return sum
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+def get_sum_import_export_stato_maggiore(x,y):
+    sum= 0
+    lenstato=len(y)
+    try :
+        n = x.split("@")
+        for i in n:
+            if (i):
+                try :
+                    val = i.split("_")
+                    value = val[2]
+                    s = val[0]
+                    if value != "nan" and (not re.search(y, s) or lenstato == len(s)) :
+                        sum += float(value)
+
+                except Exception as e:
+                    print(e)
+                    sum += 0
+    except Exception as e:
+        #print(e)
+        sum += 0
+    return sum
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
@@ -100,6 +128,31 @@ def get_sum_import_export_emissions(x):
         #print(e)
         sum += 0
     return sum
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+def get_sum_import_export_emissions_stato_maggiore(x,y):
+    sum= 0
+    lenstato=len(y)
+    try :
+        n = x.split("@")
+        for i in n:
+            if (i):
+                try :
+                    val = i.split("_")
+                    value = val[3]
+                    s = val[0]
+                    if value != "nan" and (not re.search(y, s) or lenstato == len(s)) :
+                        sum += float(value)
+
+                except Exception as e:
+                    print(e)
+                    sum += 0
+    except Exception as e:
+        #print(e)
+        sum += 0
+    return sum
+
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*--*-*-*--*-*-*-
@@ -529,14 +582,16 @@ def potenzaInEsportazioneMedia(df,params):
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_export').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export))').desc())
-            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+            x = df3.select('stato','stato_maggiore','sum_export_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_stato_maggiore))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'), col('sum(avg(sum_export_stato_maggiore))').alias('value'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','sum_export').groupBy('stato').avg().sort(col('avg(sum_export)').desc())
+            x = x.select(col('stato'), col("avg(sum_export)").alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Potenza Media Disponibile in Esportazione (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
         return 'bad request'
@@ -553,15 +608,18 @@ def emissioniInEsportazioneMedia(df,params):
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_export_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_emissions))').desc())
-            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+            x = df3.select('stato','stato_maggiore','sum_export_emission_stato_maggiores').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_emissions_stato_maggiore))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'), col('sum(avg(sum_export_emissions_stato_maggiore))').alias('value'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','sum_export_emissions').groupBy('stato').avg().sort(col('avg(sum_export_emissions)').desc())
+            x = x.select(col('stato'), col("avg(sum_export_emissions)").alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Emissioni Medie dovute alle Esportazioni (Kg di CO₂eq per minuto)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
+
     except:
         return 'bad request'
 
@@ -577,15 +635,18 @@ def potenzaInImportazioneMedia(df,params):
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_import').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import))').desc())
-            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+            x = df3.select('stato','stato_maggiore','sum_import_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import_stato_maggiore))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'),col("sum(avg(sum_import_stato_maggiore))").alias('value'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','sum_import').groupBy('stato').avg().sort(col('avg(sum_import)').desc())
+            x = x.select(col('stato'), col("avg(sum_import)").alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Potenza Media Disponibile in Importazione (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
+
     except:
         return 'bad request'
 
@@ -601,15 +662,19 @@ def emissioniInImportazioneMedia(df,params):
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_import_emissions').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import_emissions))').desc())
-            #forse qui sarebbe opportuno togliere dalla somma quelle che scambia lo stato con se stesso
+            x = df3.select('stato','stato_maggiore','sum_import_emissions_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_import_emissions_stato_maggiore))').desc())
+            x = x.select(col('stato_maggiore').alias('stato'),col("sum(avg(sum_import_emissions_stato_maggiore))").alias('value'))
+
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
             x = df3.select('stato','sum_import_emissions').groupBy('stato').avg().sort(col('avg(sum_import_emissions)').desc())
+            x = x.select(col('stato'), col("avg(sum_import_emissions)").alias('value'))
         else:
             return 'bad request'
 
+        x = x.withColumn("label", lit('Emissioni Medie dovute alle importazioni (Kg di CO₂eq per minuto)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
+
     except:
         return 'bad request'
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
