@@ -608,7 +608,7 @@ def emissioniInEsportazioneMedia(df,params):
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_export_emission_stato_maggiores').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_emissions_stato_maggiore))').desc())
+            x = df3.select('stato','stato_maggiore','sum_export_emissions_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_emissions_stato_maggiore))').desc())
             x = x.select(col('stato_maggiore').alias('stato'), col('sum(avg(sum_export_emissions_stato_maggiore))').alias('value'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
