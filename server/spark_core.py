@@ -1,3 +1,5 @@
+import math
+
 import findspark
 findspark.init()
 
@@ -81,8 +83,6 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
                  'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
                  'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
 '''
-
-
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
@@ -641,7 +641,8 @@ def potenzaMediaUtilizzataPerFonti(df, params):
 
             for i in label:
                 val_new=dfnew[i].to_numpy()[j]
-                if(val_new=='NaN'):
+
+                if(math.isnan(val_new)):
                     tmpvalue.append(0)
                 else:
                     tmpvalue.append(val_new)
@@ -708,7 +709,8 @@ def potenzaMediaInstallataPerFonti(df, params):
 
             for i in label :
                 val_new = dfnew[i].to_numpy()[j]
-                if (val_new == 'NaN') :
+
+                if (math.isnan(val_new)) :
                     tmpvalue.append(0)
                 else :
                     tmpvalue.append(val_new)
@@ -774,7 +776,8 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):
 
             for i in label :
                 val_new = dfnew[i].to_numpy()[j]
-                if (val_new == 'NaN') :
+
+                if (math.isnan(val_new)) :
                     tmpvalue.append(0)
                 else :
                     tmpvalue.append(val_new)

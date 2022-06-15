@@ -100,7 +100,6 @@ class SparkServer(BaseHTTPRequestHandler):
             elif (service_address == "potenzaMediaUtilizzataPerFonti"):
                 rows = potenzaMediaUtilizzataPerFonti(df1, params)
                 special = True
-
             elif (service_address == "potenzaMediaInstallataPerFonti") :
                 rows = potenzaMediaInstallataPerFonti(df1, params)
                 special = True
