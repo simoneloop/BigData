@@ -618,12 +618,22 @@ def potenzaMediaUtilizzataPerFonti(df, params) :
 
         dfnew=x.toPandas()
         print(dfnew)
-        array=dfnew.columns.tolist()
-        print(array)
-        for i in array:
-            print(dfnew[i].to_numpy())
-            for j in dfnew[i]:
-                print(j)
+        colonna=dfnew.columns.tolist()
+        print(colonna)
+
+        label=colonna
+        label.remove('stato')
+
+
+        for j in range(len(dfnew['stato'])):
+            x=dfnew['stato'].to_numpy()[j]
+
+            value = []
+            for i in label:
+                value.append(dfnew[i].to_numpy()[j])
+            print('stato = ' + x)
+            print(value)
+            print(label)
 
         return x.select(to_json(struct('*')).alias("json")).collect()
     except Exception as e:
