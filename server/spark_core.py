@@ -71,6 +71,7 @@ col_union_new= ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_int
 
 
 fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
+
 '''
 col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
                  'sum(nucleare_production)','sum(nucleare_emissions)','sum(geotermico_installed_capacity)','sum(geotermico_production)',
@@ -83,9 +84,35 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
                  'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
                  'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
 '''
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+def init_map_server(df):
+    map = {}
+    tmp = []
+    stati = df.select('stato_maggiore').distinct().collect()
+    for s in stati :
+        tmp.append(s[0])
+
+    map['stati'] = np.sort(tmp).tolist()
+
+    tmp = []
+    stati_sottostati = df.select('stato').distinct().collect()
+    for s in stati_sottostati :
+        tmp.append(s[0])
+
+    map['stati_sottostati'] = np.sort(tmp).tolist()
+
+    inizio = df.select(first('timestamp_inSeconds')).collect()
+    fine = df.select(last('timestamp_inSeconds')).collect()
+
+    map['start_time'] = inizio[0]
+    map['end_time'] = fine[0]
+    map['fonti'] = np.sort(fonti).tolist()
+
+    return map
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export(x):
     sum= 0
     try :
@@ -104,8 +131,8 @@ def get_sum_import_export(x):
         #print(e)
         sum += 0
     return sum
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_stato_maggiore(x,y):
     sum= 0
     lenstato=len(y)
@@ -128,8 +155,8 @@ def get_sum_import_export_stato_maggiore(x,y):
         sum += 0
     return sum
 
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_emissions(x):
     sum= 0
     try :

@@ -1,8 +1,11 @@
 import findspark
 findspark.init()
-import time
-from pyspark.sql import SparkSession
+
+import numpy as np
 import os
+import time
+import json
+from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType, DoubleType
@@ -10,7 +13,8 @@ from pyspark.sql.types import IntegerType
 from pyspark.sql.types import FloatType
 from pyspark.sql.types import DoubleType
 from http.server import HTTPServer,BaseHTTPRequestHandler
-import json
+
+
 from spark_core import *
 
 bad_request={}
@@ -25,6 +29,7 @@ ALL_FUNC=['migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','
           'potenzaInImportazioneMedia','potenzaMediaDisponibileNelloStatoKW','emissioniInEsportazioneMedia','emissioniInImportazioneMedia']
 
 TEST_FUNC=['test','params','init']
+
 
 def get_params(path) :
     path = path.replace("%", " ")
@@ -136,29 +141,11 @@ class SparkServer(BaseHTTPRequestHandler):
                 self.wfile.write(response.encode())
 
             elif (service_address == "init"):
-                map = {}
-                tmp=[]
-                stati = df1.select('stato_maggiore').distinct().collect()
-                for s in stati:
-                    tmp.append(s[0])
-                map['stati'] = tmp
-
-                tmp = []
-                stati_sottostati = df1.select('stato').distinct().collect()
-                for s in  stati_sottostati:
-                    tmp.append(s[0])
-                map['stati_sottostati'] = tmp
-
-                inizio = df1.select(first('timestamp_inSeconds')).collect()
-                fine = df1.select(last('timestamp_inSeconds')).collect()
-
-                map['start_time'] = inizio[0]
-                map['end_time'] = fine[0]
-                map['fonti']=fonti
-                self.wfile.write(json.dumps(map).encode())
+                self.wfile.write(json.dumps(INIT_MAP).encode())
 
         else:
             self.send_response(404)
+
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
@@ -215,7 +202,9 @@ def server():
     #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
     global df1
     df1 = df.cache()
-    df1.count()
+    global INIT_MAP
+    INIT_MAP = init_map_server(df1)
+
     #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
     server_address=(HOST,PORT)
