@@ -1,10 +1,9 @@
 import findspark
 findspark.init()
 
-import numpy as np
-import os
-import time
-import json
+from spark_core import *
+
+from http.server import HTTPServer,BaseHTTPRequestHandler
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.functions import udf
@@ -12,17 +11,16 @@ from pyspark.sql.types import StringType, DoubleType
 from pyspark.sql.types import IntegerType
 from pyspark.sql.types import FloatType
 from pyspark.sql.types import DoubleType
-from http.server import HTTPServer,BaseHTTPRequestHandler
 
+import json
+import numpy as np
+import os
+import time
 
-from spark_core import *
-
-bad_request={}
-bad_request['error']= BAD_REQUEST
 
 HOST='localhost'
 PORT=8080
-REQUEST_FILTER_ONE='func1'
+
 
 ALL_FUNC=['migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti',
           'potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','distribuzioneDellaPotenzaDisponibileNelTempo','potenzaInEsportazioneMedia',
@@ -113,7 +111,11 @@ class SparkServer(BaseHTTPRequestHandler):
                 special = True
             elif (service_address == "distribuzioneDellaPotenzaDisponibileNelTempo") :
                 rows = distribuzioneDellaPotenzaDisponibileNelTempo(df1, params)
-                #special = True
+                special = True
+            elif (service_address == "distribuzioneDelleEmissioniNelTempo") :
+                rows = distribuzioneDelleEmissioniNelTempo(df1, params)
+                special = True
+
             if (rows == BAD_REQUEST) :
                 files = bad_request
             else:

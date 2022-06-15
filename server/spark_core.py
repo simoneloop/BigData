@@ -1,22 +1,25 @@
-import math
-
 import findspark
 findspark.init()
 
-from pyspark.sql import SparkSession
+
 from pyspark.sql.functions import *
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType,FloatType
 from pyspark.sql.types import IntegerType
 from pyspark.sql.types import DoubleType
-import os
-import os.path
-import time
-import re
-import numpy as np
-import pandas as pd
+from pyspark.sql import SparkSession
 
-#import multiprocessing
+import multiprocessing
+import pandas as pd
+import numpy as np
+import os.path
+import os
+import math
+import re
+import time
+
+
+
 #n_core = multiprocessing.cpu_count()
 path = "../statesCSV"
 
@@ -38,8 +41,13 @@ repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatTy
 repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
+
 BAD_REQUEST='bad request'
-fasce_MPSN=['mattina 06:00-11:59','pomeriggio 12:00-17:59','sera 18:00-22:59','notte 23:00-05:59']
+bad_request={}
+bad_request['error']= BAD_REQUEST
+
+fasce_MPSN = ['mattina 06:00-11:59','pomeriggio 12:00-17:59','sera 18:00-22:59','notte 23:00-05:59']
+fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
@@ -69,8 +77,6 @@ col_union_new= ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_int
                'sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
                'sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
 
-
-fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
 
 '''
 col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_installed_capacity)',
@@ -619,7 +625,7 @@ def emissioniInImportazioneMedia(df,params):#todo ok
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def potenzaMediaUtilizzataPerFonti(df, params):
+def potenzaMediaUtilizzataPerFonti(df, params):#todo ok
     try :
         seleziona = params['tipo']
         stati = params['stati']
@@ -687,7 +693,7 @@ def potenzaMediaUtilizzataPerFonti(df, params):
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaInstallataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaInstallataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def potenzaMediaInstallataPerFonti(df, params):
+def potenzaMediaInstallataPerFonti(df, params):#todo ok
     try :
         seleziona = params['tipo']
         stati = params['stati']
@@ -755,7 +761,8 @@ def potenzaMediaInstallataPerFonti(df, params):
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinutoPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinutoPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def emissioniMediaCO2eqMinutoPerFonti(df, params):
+def emissioniMediaCO2eqMinutoPerFonti(df, params):#todo ok
+
     try :
         seleziona = params['tipo']
         stati = params['stati']
@@ -822,41 +829,172 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaPotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaPotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):
+def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
     try :
-        seleziona = params['tipo']
         stati = params['stati']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        fonti = params['fonti']
 
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
+        if(len(stati) == 1):
 
-        f = []
-        f.append('timestamp')
+            seleziona = params['tipo']
+            giorni = params['giorni']
+            fascia_oraria = params['fascia_oraria']
+            fonti = params['fonti']
 
-        if (seleziona == 'stati') :
-            f.append('stato_maggiore')
-        elif (seleziona == 'sotto_stati') :
-            f.append('stato')
-        for i in fonti :
-            f.append(i + '_production')
+            df1 = query_timestamp(df, giorni)
+            df2 = query_fascia_oraria(df1, fascia_oraria)
 
-        if (seleziona == 'stati') :
-            df3 = query_stati_maggiore(df2, stati)
-            x = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()  # problema ordinamento?
+            f = []
+            f.append('timestamp')
 
-        elif (seleziona == 'sotto_stati') :
-            df3 = query_stati(df2, stati)
-            x = df3.select(*f)
-        else :
+            if (seleziona == 'stati') :
+                f.append('stato_maggiore')
+            elif (seleziona == 'sotto_stati') :
+                f.append('stato')
+            for i in fonti:
+                f.append(i + '_production')
+
+            if (seleziona == 'stati'):
+                df3 = query_stati_maggiore(df2, stati)
+                x1 = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()
+                x = x1.sort(col('timestamp').asc())
+
+            elif (seleziona == 'sotto_stati'):
+                df3 = query_stati(df2, stati)
+                x = df3.select(*f)
+            else :
+                return BAD_REQUEST
+
+            dfnew=x.toPandas()
+            colonna=dfnew.columns.tolist()
+
+            label=colonna
+            label.remove('timestamp')
+            label.remove('stato')
+
+            res=[]
+
+            tmplabel = []
+            if(seleziona == 'stati'):
+
+                for l in range(len(label)):
+                    tmpLabel = label[l].split("(")
+                    tmpLabel = tmpLabel[len(tmpLabel) - 1]
+                    tmpLabel = tmpLabel.replace(")", "")
+                    tmplabel.append(tmpLabel + ' (KW)')
+            else:
+                for l in label:
+                    tmplabel.append(l + ' (KW)')
+            print(tmplabel)
+            for j in range(len(dfnew['stato'])):
+                tmpMap={}
+                tmpvalue = []
+                tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
+                #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+
+                for i in label :
+                    val_new = dfnew[i].to_numpy()[j]
+
+                    if (math.isnan(val_new)) :
+                        tmpvalue.append(float(0))
+                    else :
+                        tmpvalue.append(float(val_new))
+
+                tmpMap['value'] = tmpvalue
+                tmpMap['label'] = tmplabel
+
+                res.append(tmpMap)
+
+            print(res)
+            return res
+        else:
             return BAD_REQUEST
-
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
+    except Exception as e:
+        print(e)
         return BAD_REQUEST
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def distribuzioneDelleEmissioniNelTempo(df, params):
+    try :
+        stati = params['stati']
 
+        if(len(stati) == 1):
+
+            seleziona = params['tipo']
+            giorni = params['giorni']
+            fascia_oraria = params['fascia_oraria']
+            fonti = params['fonti']
+
+            df1 = query_timestamp(df, giorni)
+            df2 = query_fascia_oraria(df1, fascia_oraria)
+
+            f = []
+            f.append('timestamp')
+
+            if (seleziona == 'stati') :
+                f.append('stato_maggiore')
+            elif (seleziona == 'sotto_stati') :
+                f.append('stato')
+            for i in fonti:
+                f.append(i + '_emissions')
+
+            if (seleziona == 'stati'):
+                df3 = query_stati_maggiore(df2, stati)
+                x1 = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()
+                x = x1.sort(col('timestamp').asc())
+
+            elif (seleziona == 'sotto_stati'):
+                df3 = query_stati(df2, stati)
+                x = df3.select(*f)
+            else :
+                return BAD_REQUEST
+
+            dfnew=x.toPandas()
+            colonna=dfnew.columns.tolist()
+
+            label=colonna
+            label.remove('timestamp')
+            label.remove('stato')
+
+            res=[]
+
+            tmplabel = []
+            if(seleziona == 'stati'):
+
+                for l in range(len(label)):
+                    tmpLabel = label[l].split("(")
+                    tmpLabel = tmpLabel[len(tmpLabel) - 1]
+                    tmpLabel = tmpLabel.replace(")", "")
+                    tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
+            else:
+                for l in label:
+                    tmplabel.append(l + ' (Kg di CO₂eq per minuto)')
+            print(tmplabel)
+            for j in range(len(dfnew['stato'])):
+                tmpMap={}
+                tmpvalue = []
+                tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
+                #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+
+                for i in label :
+                    val_new = dfnew[i].to_numpy()[j]
+
+                    if (math.isnan(val_new)) :
+                        tmpvalue.append(float(0))
+                    else :
+                        tmpvalue.append(float(val_new))
+
+                tmpMap['value'] = tmpvalue
+                tmpMap['label'] = tmplabel
+
+                res.append(tmpMap)
+
+            print(res)
+            return res
+        else:
+            return BAD_REQUEST
+    except Exception as e:
+        print(e)
+        return BAD_REQUEST
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
