@@ -39,7 +39,7 @@ repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 BAD_REQUEST='bad request'
-fasce_MPSN=['mattina','pomeriggio','sera','notte']
+fasce_MPSN=['mattina 06:00-11:59 ','pomeriggio 12:00-17:59','sera 18:00-22:59','notte 23:00-05:59']
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
@@ -86,7 +86,6 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
 '''
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
-
 def init_map_server(df):
     map = {}
     tmp = []
@@ -102,7 +101,7 @@ def init_map_server(df):
         tmp.append(s[0])
 
     map['stati_sottostati'] = np.sort(tmp).tolist()
-
+    map['time_slots'] = fasce_MPSN
     inizio = df.select(first('timestamp_inSeconds')).collect()
     fine = df.select(last('timestamp_inSeconds')).collect()
 
