@@ -81,6 +81,9 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
                  'sum(petrolio_installed_capacity)','sum(petrolio_production)','sum(petrolio_emissions)','sum(sconosciuto_installed_capacity)',
                  'sum(sconosciuto_production)','sum(sconosciuto_emissions)','sum(consumo)','sum(sum_import)','sum(sum_export)']
 '''
+
+
+
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export(x):
@@ -617,25 +620,40 @@ def potenzaMediaUtilizzataPerFonti(df, params) :
             return BAD_REQUEST
 
         dfnew=x.toPandas()
-        print(dfnew)
+
         colonna=dfnew.columns.tolist()
-        print(colonna)
+
 
         label=colonna
         label.remove('stato')
+        res=[]
+        tmpL = []
+        for l in range(len(label)):
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmpL.append(tmpLabel)
 
 
         for j in range(len(dfnew['stato'])):
-            x=dfnew['stato'].to_numpy()[j]
+            tmpMap={}
+            tmpMap['stato']=dfnew['stato'].to_numpy()[j]
 
             value = []
             for i in label:
                 value.append(dfnew[i].to_numpy()[j])
-            print('stato = ' + x)
-            print(value)
-            print(label)
+            tmpMap['value'] = value
 
-        return x.select(to_json(struct('*')).alias("json")).collect()
+
+            tmpMap['label']=tmpL
+
+
+            res.append(tmpMap)
+        #     print(tmpMap)
+        #     print("###########################################")
+        # print(res)
+
+        return res
     except Exception as e:
         print(e)
         return BAD_REQUEST

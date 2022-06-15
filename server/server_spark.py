@@ -99,6 +99,8 @@ class SparkServer(BaseHTTPRequestHandler):
                 rows = emissioniInImportazioneMedia(df1, params)
             elif (service_address == "potenzaMediaUtilizzataPerFonti"):
                 rows = potenzaMediaUtilizzataPerFonti(df1, params)
+                self.wfile.write(json.dumps(rows).encode())
+                return
 
             elif (service_address == "potenzaMediaInstallataPerFonti") :
                 rows = potenzaMediaInstallataPerFonti(df1, params)
