@@ -818,7 +818,7 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):
 
         if (seleziona == 'stati') :
             df3 = query_stati_maggiore(df2, stati)
-            x = df3.select(*f).groupBy('timestamp', 'stato_maggiore').sum()  # problema ordinamento?
+            x = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()  # problema ordinamento?
 
         elif (seleziona == 'sotto_stati') :
             df3 = query_stati(df2, stati)

@@ -108,7 +108,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 special = True
             elif (service_address == "distribuzioneDellaPotenzaDisponibileNelTempo") :
                 rows = distribuzioneDellaPotenzaDisponibileNelTempo(df1, params)
-                special = True
+                #special = True
             if (rows == BAD_REQUEST) :
                 files = bad_request
             else:
