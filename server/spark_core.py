@@ -11,6 +11,8 @@ import os
 import os.path
 import time
 import re
+import numpy as np
+import pandas as pd
 
 #import multiprocessing
 #n_core = multiprocessing.cpu_count()
@@ -34,7 +36,7 @@ repair_total_production=udf(lambda x, y: get_new_total_production(x, y), FloatTy
 repair_total_emissions=udf(lambda x, y: get_new_total_emissions(x, y), FloatType())
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
-
+BAD_REQUEST='bad request'
 fasce_MPSN=['mattina','pomeriggio','sera','notte']
 
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
@@ -297,6 +299,8 @@ def get_new_total_emissions(x,y):
 # def get_nstates_on_source(n,source_list):
 #     pass
 #
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 millis_day=86400
 def query_timestamp(df, giorni):
 
@@ -315,7 +319,8 @@ def query_timestamp(df, giorni):
     else:
         return 100/0
 
-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_fascia_oraria(df, fasce):
     fasce_tmp = []
     for s in fasce:
@@ -323,6 +328,8 @@ def query_fascia_oraria(df, fasce):
 
     return df.filter(" or ".join(fasce_tmp))
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_stati(df, stati):
     stati_tmp=[]
     for s in stati:
@@ -330,6 +337,8 @@ def query_stati(df, stati):
 
     return df.filter(" or ".join(stati_tmp))
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_stati_maggiore(df, stati):
     stati_maggiore_tmp=[]
     for s in stati:
@@ -347,7 +356,9 @@ def query_fonte(df, fonti):
     return df.select(*col_selezionate)
 '''
 
-def migliorRapportoCo2Kwh(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--migliorRapportoCo2Kwh--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--migliorRapportoCo2Kwh--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def migliorRapportoCo2Kwh(df,params):#todo ok
     try:
         seleziona= params['tipo']
         stati = params['stati']
@@ -372,7 +383,9 @@ def migliorRapportoCo2Kwh(df,params):
     except:
         return 'bad request'
 
-def potenzaMediaKW(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaMediaKW(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -392,14 +405,16 @@ def potenzaMediaKW(df,params):
             x = df3.select('stato','total_production').groupBy('stato').avg().sort(col('avg(total_production)').desc())
             x = x.select(col('stato'), col("avg(total_production)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Potenza Media Prodotta (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-def potenzaMediaDisponibileNelloStatoKW(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaDisponibileNelloStatoKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaDisponibileNelloStatoKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaMediaDisponibileNelloStatoKW(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -419,15 +434,16 @@ def potenzaMediaDisponibileNelloStatoKW(df,params):
             x = df3.select('stato','consumo').groupBy('stato').avg().sort(col('avg(consumo)').desc())
             x = x.select(col('stato'), col("avg(consumo)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Potenza Media Disponibile (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-
-def emissioniMediaCO2eqMinuto(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinuto--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinuto--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def emissioniMediaCO2eqMinuto(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -447,145 +463,16 @@ def emissioniMediaCO2eqMinuto(df,params):
             x = df3.select('stato','total_emissions').groupBy('stato').avg().sort(col('avg(total_emissions)').desc())
             x = x.select(col('stato'), col('avg(total_emissions)').alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Inquinamento Medio Prodotto (Kg di CO₂eq per minuto) '))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-
-def potenzaMediaUtilizzataPerFonti(df,params):
-    try :
-        seleziona= params['tipo']
-        stati = params['stati']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        fonti = params['fonti']
-
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
-
-        f=[]
-        f.append('stato')
-        f.append('stato_maggiore')
-        for i in fonti:
-            f.append(i+'_production')
-
-        if(seleziona=='stati'):
-            df3= query_stati_maggiore(df2,stati)
-            x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
-
-        elif(seleziona=='sotto_stati'):
-            df3 = query_stati(df2, stati)
-            x = df3.select(*f).groupBy('stato').avg()
-        else:
-            return 'bad request'
-
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except:
-        return 'bad request'
-
-def potenzaMediaInstallataPerFonti(df,params):
-    try :
-        seleziona= params['tipo']
-        stati = params['stati']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        fonti = params['fonti']
-
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
-
-        f=[]
-        f.append('stato')
-        f.append('stato_maggiore')
-        for i in fonti:
-            f.append(i+'_installed_capacity')
-
-        if(seleziona=='stati'):
-            df3= query_stati_maggiore(df2,stati)
-            x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
-
-        elif(seleziona=='sotto_stati'):
-            df3 = query_stati(df2, stati)
-            x = df3.select(*f).groupBy('stato').avg()
-        else :
-            return 'bad request'
-
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
-        return 'bad request'
-
-def emissioniMediaCO2eqMinutoPerFonti(df,params):
-    try :
-        seleziona= params['tipo']
-        stati = params['stati']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        fonti = params['fonti']
-
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
-
-        f=[]
-        f.append('stato')
-        f.append('stato_maggiore')
-        for i in fonti:
-            f.append(i+'_emissions')
-
-        if(seleziona=='stati'):
-            df3= query_stati_maggiore(df2,stati)
-            x = df3.select(*f).groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum()
-
-        elif(seleziona=='sotto_stati'):
-            df3 = query_stati(df2, stati)
-            x = df3.select(*f).groupBy('stato').avg()
-        else :
-            return 'bad request'
-
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
-        return 'bad request'
-
-
-
-def distribuzioneDellaPotenzaDisponibileNelTempo(df,params):
-    try :
-        seleziona= params['tipo']
-        stati = params['stati']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        fonti = params['fonti']
-
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
-
-        f=[]
-        f.append('timestamp')
-
-        if (seleziona == 'stati') :
-            f.append('stato_maggiore')
-        elif (seleziona == 'sotto_stati'):
-            f.append('stato')
-        for i in fonti:
-            f.append(i+'_production')
-
-        if(seleziona=='stati'):
-            df3= query_stati_maggiore(df2,stati)
-            x = df3.select(*f).groupBy('timestamp','stato_maggiore').sum()#problema ordinamento?
-
-        elif(seleziona=='sotto_stati'):
-            df3 = query_stati(df2, stati)
-            x = df3.select(*f)
-        else :
-            return 'bad request'
-
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
-        return 'bad request'
-
-def potenzaInEsportazioneMedia(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--potenzaInEsportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--potenzaInEsportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaInEsportazioneMedia(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -604,14 +491,16 @@ def potenzaInEsportazioneMedia(df,params):
             x = df3.select('stato','sum_export').groupBy('stato').avg().sort(col('avg(sum_export)').desc())
             x = x.select(col('stato'), col("avg(sum_export)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Potenza Media Disponibile in Esportazione (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-def emissioniInEsportazioneMedia(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--emissioniInEsportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--emissioniInEsportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def emissioniInEsportazioneMedia(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -630,15 +519,17 @@ def emissioniInEsportazioneMedia(df,params):
             x = df3.select('stato','sum_export_emissions').groupBy('stato').avg().sort(col('avg(sum_export_emissions)').desc())
             x = x.select(col('stato'), col("avg(sum_export_emissions)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Emissioni Medie dovute alle Esportazioni (Kg di CO₂eq per minuto)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
 
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-def potenzaInImportazioneMedia(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--potenzaInImportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--potenzaInImportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaInImportazioneMedia(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -657,15 +548,17 @@ def potenzaInImportazioneMedia(df,params):
             x = df3.select('stato','sum_import').groupBy('stato').avg().sort(col('avg(sum_import)').desc())
             x = x.select(col('stato'), col("avg(sum_import)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Potenza Media Disponibile in Importazione (KW)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
 
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
-def emissioniInImportazioneMedia(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--emissioniInImportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--emissioniInImportazioneMedia--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def emissioniInImportazioneMedia(df,params):#todo ok
     try :
         seleziona= params['tipo']
         stati = params['stati']
@@ -685,13 +578,165 @@ def emissioniInImportazioneMedia(df,params):
             x = df3.select('stato','sum_import_emissions').groupBy('stato').avg().sort(col('avg(sum_import_emissions)').desc())
             x = x.select(col('stato'), col("avg(sum_import_emissions)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Emissioni Medie dovute alle importazioni (Kg di CO₂eq per minuto)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
 
     except:
-        return 'bad request'
+        return BAD_REQUEST
+
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaMediaUtilizzataPerFonti(df, params) :
+    try :
+        seleziona = params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        fonti = params['fonti']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        f = []
+        f.append('stato')
+        f.append('stato_maggiore')
+        for i in fonti :
+            f.append(i + '_production')
+
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
+            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
+
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('stato').avg()
+        else :
+            return BAD_REQUEST
+
+        dfnew=x.toPandas()
+        print(dfnew)
+        array=dfnew.columns.tolist()
+        print(array)
+        for i in array:
+            print(dfnew[i].to_numpy())
+            for j in dfnew[i]:
+                print(j)
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except Exception as e:
+        print(e)
+        return BAD_REQUEST
+
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaInstallataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaInstallataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def potenzaMediaInstallataPerFonti(df, params):
+    try :
+        seleziona = params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        fonti = params['fonti']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        f = []
+        f.append('stato')
+        f.append('stato_maggiore')
+        for i in fonti :
+            f.append(i + '_installed_capacity')
+
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
+            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('stato').avg()
+        else :
+            return BAD_REQUEST
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except :
+        return BAD_REQUEST
+
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinutoPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--emissioniMediaCO2eqMinutoPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def emissioniMediaCO2eqMinutoPerFonti(df, params):
+    try :
+        seleziona = params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        fonti = params['fonti']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        f = []
+        f.append('stato')
+        f.append('stato_maggiore')
+        for i in fonti :
+            f.append(i + '_emissions')
+
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
+            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy('stato_maggiore').sum()
+
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('stato').avg()
+        else :
+            return BAD_REQUEST
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except :
+        return BAD_REQUEST
+
+
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaPotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaPotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):
+    try :
+        seleziona = params['tipo']
+        stati = params['stati']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        fonti = params['fonti']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        f = []
+        f.append('timestamp')
+
+        if (seleziona == 'stati') :
+            f.append('stato_maggiore')
+        elif (seleziona == 'sotto_stati') :
+            f.append('stato')
+        for i in fonti :
+            f.append(i + '_production')
+
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
+            x = df3.select(*f).groupBy('timestamp', 'stato_maggiore').sum()  # problema ordinamento?
+
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f)
+        else :
+            return BAD_REQUEST
+
+        return x.select(to_json(struct('*')).alias("json")).collect()
+    except :
+        return BAD_REQUEST
+
+
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def creazioneFile():
