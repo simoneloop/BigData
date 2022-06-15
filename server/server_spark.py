@@ -63,7 +63,7 @@ class SparkServer(BaseHTTPRequestHandler):
 
         print(params)
         print(service_address)
-
+        special=False
         if(service_address in ALL_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
@@ -99,22 +99,24 @@ class SparkServer(BaseHTTPRequestHandler):
                 rows = emissioniInImportazioneMedia(df1, params)
             elif (service_address == "potenzaMediaUtilizzataPerFonti"):
                 rows = potenzaMediaUtilizzataPerFonti(df1, params)
-                self.wfile.write(json.dumps(rows).encode())
-                return
+                special = True
 
             elif (service_address == "potenzaMediaInstallataPerFonti") :
                 rows = potenzaMediaInstallataPerFonti(df1, params)
-
+                special = True
             elif (service_address == "emissioniMediaCO2eqMinutoPerFonti") :
                 rows = emissioniMediaCO2eqMinutoPerFonti(df1, params)
-
+                special = True
             elif (service_address == "distribuzioneDellaPotenzaDisponibileNelTempo") :
                 rows = distribuzioneDellaPotenzaDisponibileNelTempo(df1, params)
-
+                special = True
             if (rows == BAD_REQUEST) :
                 files = bad_request
             else:
-                files = [json.loads(row[0]) for row in rows]
+                if (special):
+                    files=rows
+                else:
+                    files = [json.loads(row[0]) for row in rows]
             self.wfile.write(json.dumps(files).encode())
 
         elif(service_address in TEST_FUNC):

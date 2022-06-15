@@ -592,7 +592,7 @@ def emissioniInImportazioneMedia(df,params):#todo ok
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaUtilizzataPerFonti--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def potenzaMediaUtilizzataPerFonti(df, params) :
+def potenzaMediaUtilizzataPerFonti(df, params):
     try :
         seleziona = params['tipo']
         stati = params['stati']
@@ -623,35 +623,33 @@ def potenzaMediaUtilizzataPerFonti(df, params) :
 
         colonna=dfnew.columns.tolist()
 
-
         label=colonna
         label.remove('stato')
         res=[]
-        tmpL = []
+        tmplabel = []
         for l in range(len(label)):
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmpL.append(tmpLabel)
+            tmplabel.append(tmpLabel)
 
 
         for j in range(len(dfnew['stato'])):
             tmpMap={}
+            tmpvalue = []
             tmpMap['stato']=dfnew['stato'].to_numpy()[j]
 
-            value = []
             for i in label:
-                value.append(dfnew[i].to_numpy()[j])
-            tmpMap['value'] = value
+                val_new=dfnew[i].to_numpy()[j]
+                if(val_new=='NaN'):
+                    tmpvalue.append(0)
+                else:
+                    tmpvalue.append(val_new)
 
-
-            tmpMap['label']=tmpL
-
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
 
             res.append(tmpMap)
-        #     print(tmpMap)
-        #     print("###########################################")
-        # print(res)
 
         return res
     except Exception as e:
@@ -680,7 +678,7 @@ def potenzaMediaInstallataPerFonti(df, params):
 
         if (seleziona == 'stati') :
             df3 = query_stati_maggiore(df2, stati)
-            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy('stato_maggiore').sum()
+            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
 
         elif (seleziona == 'sotto_stati') :
             df3 = query_stati(df2, stati)
@@ -688,8 +686,41 @@ def potenzaMediaInstallataPerFonti(df, params):
         else :
             return BAD_REQUEST
 
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
+        dfnew=x.toPandas()
+
+        colonna=dfnew.columns.tolist()
+
+        label=colonna
+        label.remove('stato')
+        res=[]
+        tmplabel = []
+        for l in range(len(label)):
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmplabel.append(tmpLabel)
+
+
+        for j in range(len(dfnew['stato'])):
+            tmpMap={}
+            tmpvalue = []
+            tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+                if (val_new == 'NaN') :
+                    tmpvalue.append(0)
+                else :
+                    tmpvalue.append(val_new)
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+
+        return res
+    except Exception as e:
+        print(e)
         return BAD_REQUEST
 
 
@@ -714,7 +745,7 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):
 
         if (seleziona == 'stati') :
             df3 = query_stati_maggiore(df2, stati)
-            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy('stato_maggiore').sum()
+            x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
 
         elif (seleziona == 'sotto_stati') :
             df3 = query_stati(df2, stati)
@@ -722,8 +753,40 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):
         else :
             return BAD_REQUEST
 
-        return x.select(to_json(struct('*')).alias("json")).collect()
-    except :
+        dfnew=x.toPandas()
+        colonna=dfnew.columns.tolist()
+
+        label=colonna
+        label.remove('stato')
+        res=[]
+        tmplabel = []
+        for l in range(len(label)):
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmplabel.append(tmpLabel)
+
+
+        for j in range(len(dfnew['stato'])):
+            tmpMap={}
+            tmpvalue = []
+            tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+                if (val_new == 'NaN') :
+                    tmpvalue.append(0)
+                else :
+                    tmpvalue.append(val_new)
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+
+        return res
+    except Exception as e:
+        print(e)
         return BAD_REQUEST
 
 
