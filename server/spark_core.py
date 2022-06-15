@@ -658,7 +658,7 @@ def potenzaMediaUtilizzataPerFonti(df, params):
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel)
+            tmplabel.append(tmpLabel+' (KW)')
 
 
         for j in range(len(dfnew['stato'])):
@@ -726,7 +726,7 @@ def potenzaMediaInstallataPerFonti(df, params):
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel)
+            tmplabel.append(tmpLabel+' (KW)')
 
 
         for j in range(len(dfnew['stato'])):
@@ -793,7 +793,7 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel)
+            tmplabel.append(tmpLabel+' (Kg di CO₂eq per minuto)')
 
 
         for j in range(len(dfnew['stato'])):
