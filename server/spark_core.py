@@ -971,7 +971,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):
                 f.append('stato')
             for i in fonti :
                 f.append(i + '_emissions')
-            print('CIAOOOOOOOOOOOOOOOOOOOOO')
+
             if (seleziona == 'stati'):
                 df3 = query_stati_maggiore(df2, stati)
                 x1 = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()
