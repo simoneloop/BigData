@@ -873,7 +873,11 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
             colonna=dfnew.columns.tolist()
 
             label=colonna
-            label.remove('sun(timestamp_inSeconds)')
+            if (seleziona == 'stati') :
+                label.remove('sun(timestamp_inSeconds)')
+            elif (seleziona == 'sotto_stati') :
+                pass
+
             label.remove('timestamp')
             label.remove('stato')
             print(label)
