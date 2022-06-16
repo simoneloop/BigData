@@ -836,130 +836,111 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):#todo ok
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaPotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
     try :
+        seleziona = params['tipo']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
         stati = params['stati']
-
-        if(len(stati) == 1):
-
-
-            seleziona = params['tipo']
-            giorni = params['giorni']
-            fascia_oraria = params['fascia_oraria']
-            fonti = params['fonti']
-
-            df1 = query_timestamp(df, giorni)
-            df2 = query_fascia_oraria(df1, fascia_oraria)
-
-            f = []
-            f.append('timestamp_inSeconds')
-            f.append('timestamp')
-
-            if (seleziona == 'stati') :
-                f.append('stato_maggiore')
-            elif (seleziona == 'sotto_stati') :
-                f.append('stato')
-            for i in fonti:
-                f.append(i + '_production')
-
-            if (seleziona == 'stati'):
-                df3 = query_stati_maggiore(df2, stati)
-                x1 = df3.select(*f).groupBy('timestamp_inSeconds','timestamp', col('stato_maggiore').alias('stato')).sum()
-                x = x1.sort(col('timestamp_inSeconds').asc())
+        fonti = params['fonti']
 
 
-            elif (seleziona == 'sotto_stati'):
-                df3 = query_stati(df2, stati)
-                x = df3.select(*f)
-            else :
-                return BAD_REQUEST
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
 
-            dfnew=x.toPandas()
-            colonna=dfnew.columns.tolist()
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
 
-            label=colonna
-            if (seleziona == 'stati') :
-                label.remove('timestamp_inSeconds')
-                label.remove('sum(timestamp_inSeconds)')
-            elif (seleziona == 'sotto_stati'):
-                label.remove('timestamp_inSeconds')
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
 
-                pass
-            elif (seleziona == 'sotto_stati') :
-                pass
-
-            label.remove('timestamp')
-            label.remove('stato')
-            print(label)
-            res=[]
-
-            tmplabel = []
-            if(seleziona == 'stati'):
-
-                for l in range(len(label)):
-                    tmpLabel = label[l].split("(")
-                    tmpLabel = tmpLabel[len(tmpLabel) - 1]
-                    tmpLabel = tmpLabel.replace(")", "")
-                    tmplabel.append(tmpLabel + ' (KW)')
-            else:
-                for l in label:
-                    tmplabel.append(l + ' (KW)')
-            #print(tmplabel)
-
-            j=0
-            #print(len(dfnew['stato']))
-            while(j<len(dfnew['stato'])):
-
-                tmpMap = {}
-
-                tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
-                # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
-                val_array_new=[0]*(len(label))
-
-                for i in range(len(label)):
-                    val_array_new[i]=float(0)
-                for k in range(6):
-
-                    for i in range(len(label)):
-                        v = dfnew[label[i]].to_numpy()[j]
-                        if (math.isnan(v)) :
-                            val_array_new[i] = val_array_new[i] + float(0)
-                        else :
-                            val_array_new[i] = val_array_new[i] + float(v)
-                    j = j + 1
-
-                for i in range(len(label)):
-                    val_array_new[i] = val_array_new[i]/float(6)
-                #tmpvalue.append(val_array_new)
-
-                #print(val_array_new)
-                tmpMap['value'] = val_array_new
-                tmpMap['label'] = tmplabel
-
-                res.append(tmpMap)
-
-            '''
-            for j in range(len(dfnew['stato'])):
-                tmpMap={}
-                tmpvalue = []
-                tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
-                #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
-
-                for i in label :
-                    val_new = dfnew[i].to_numpy()[j]
-
-                    if (math.isnan(val_new)) :
-                        tmpvalue.append(float(0))
-                    else :
-                        tmpvalue.append(float(val_new))
-
-                tmpMap['value'] = tmpvalue
-                tmpMap['label'] = tmplabel
-
-                res.append(tmpMap)
-            '''
-            print(res)
-            return res
-        else:
+        else :
             return BAD_REQUEST
+
+        f = []
+        f.append('timestamp_inSeconds')
+        f.append('timestamp')
+
+        for i in fonti :
+            f.append(i + '_production')
+
+        x = df3.select(*f).groupBy('timestamp_inSeconds', 'timestamp').sum().sort(col('timestamp_inSeconds').asc())
+
+        dfnew = x.toPandas()
+        colonna = dfnew.columns.tolist()
+
+        label = colonna
+        label.remove('timestamp')
+        label.remove('timestamp_inSeconds')
+        label.remove('sum(timestamp_inSeconds)')
+
+
+        res = []
+        tmplabel = []
+
+        if (seleziona == 'stati') :
+
+            for l in range(len(label)) :
+                tmpLabel = label[l].split("(")
+                tmpLabel = tmpLabel[len(tmpLabel) - 1]
+                tmpLabel = tmpLabel.replace(")", "")
+                tmplabel.append(tmpLabel + ' (KWh)')
+        elif (seleziona == 'sotto_stati'):
+            for l in label :
+                tmplabel.append(l + ' (KWh)')
+
+
+        j = 0
+        while (j < len(dfnew['timestamp_inSeconds'])) :
+
+            tmpMap = {}
+
+            tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
+            # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+            val_array_new = [0] * (len(label))
+
+            for i in range(len(label)) :
+                val_array_new[i] = float(0)
+            for k in range(6) :
+
+                for i in range(len(label)) :
+                    v = dfnew[label[i]].to_numpy()[j]
+                    if (math.isnan(v)) :
+                        val_array_new[i] = val_array_new[i] + float(0)
+                    else :
+                        val_array_new[i] = val_array_new[i] + float(v)
+                j = j + 1
+
+            for i in range(len(label)) :
+                val_array_new[i] = val_array_new[i] / float(6)
+            # tmpvalue.append(val_array_new)
+
+            # print(val_array_new)
+            tmpMap['value'] = val_array_new
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+
+        '''
+        for j in range(len(dfnew['stato'])):
+            tmpMap={}
+            tmpvalue = []
+            tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
+            #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+    
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+    
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
+    
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+    
+            res.append(tmpMap)
+        '''
+        return res
+
     except Exception as e:
         print(e)
         return BAD_REQUEST
