@@ -876,7 +876,7 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
             label=colonna
             label.remove('timestamp_inSeconds')
             label.remove('timestamp')
-            label.remove('stato')
+
 
             res=[]
 
