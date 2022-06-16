@@ -884,7 +884,41 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
             else:
                 for l in label:
                     tmplabel.append(l + ' (KW)')
-            print(tmplabel)
+            #print(tmplabel)
+
+            j=0
+            #print(len(dfnew['stato']))
+            while(j<len(dfnew['stato'])):
+
+                tmpMap = {}
+
+                tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
+                # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+                val_array_new=[0]*(len(label)+1)
+
+                for i in range(len(label)):
+                    val_array_new[i]=float(0)
+                for k in range(6):
+
+                    for i in range(len(label)):
+                        v = dfnew[label[i]].to_numpy()[j]
+                        if (math.isnan(v)) :
+                            val_array_new[i] = val_array_new[i] + float(0)
+                        else :
+                            val_array_new[i] = val_array_new[i] + float(v)
+                    j = j + 1
+
+                for i in range(len(label)):
+                    val_array_new[i] = val_array_new[i]/float(6)
+                #tmpvalue.append(val_array_new)
+
+                #print(val_array_new)
+                tmpMap['value'] = val_array_new
+                tmpMap['label'] = tmplabel
+
+                res.append(tmpMap)
+
+            '''
             for j in range(len(dfnew['stato'])):
                 tmpMap={}
                 tmpvalue = []
@@ -903,7 +937,7 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
                 tmpMap['label'] = tmplabel
 
                 res.append(tmpMap)
-
+            '''
             print(res)
             return res
         else:
@@ -911,6 +945,7 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
     except Exception as e:
         print(e)
         return BAD_REQUEST
+
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def distribuzioneDelleEmissioniNelTempo(df, params):
@@ -934,9 +969,9 @@ def distribuzioneDelleEmissioniNelTempo(df, params):
                 f.append('stato_maggiore')
             elif (seleziona == 'sotto_stati') :
                 f.append('stato')
-            for i in fonti:
+            for i in fonti :
                 f.append(i + '_emissions')
-
+            print('CIAOOOOOOOOOOOOOOOOOOOOO')
             if (seleziona == 'stati'):
                 df3 = query_stati_maggiore(df2, stati)
                 x1 = df3.select(*f).groupBy('timestamp', col('stato_maggiore').alias('stato')).sum()
@@ -947,7 +982,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):
                 x = df3.select(*f)
             else :
                 return BAD_REQUEST
-
+            x.show()
             dfnew=x.toPandas()
             colonna=dfnew.columns.tolist()
 

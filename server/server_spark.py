@@ -22,9 +22,12 @@ HOST='localhost'
 PORT=8080
 
 
-ALL_FUNC=['migliorRapportoCo2Kwh','potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaUtilizzataPerFonti',
-          'potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti','distribuzioneDellaPotenzaDisponibileNelTempo','potenzaInEsportazioneMedia',
-          'potenzaInImportazioneMedia','potenzaMediaDisponibileNelloStatoKW','emissioniInEsportazioneMedia','emissioniInImportazioneMedia']
+ALL_FUNC=['migliorRapportoCo2Kwh',
+          'potenzaMediaKW','emissioniMediaCO2eqMinuto','potenzaMediaDisponibileNelloStatoKW',
+          'potenzaMediaUtilizzataPerFonti','potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti',
+          'potenzaInEsportazioneMedia','potenzaInImportazioneMedia',
+          'emissioniInEsportazioneMedia','emissioniInImportazioneMedia',
+          'distribuzioneDellaPotenzaDisponibileNelTempo','distribuzioneDelleEmissioniNelTempo']
 
 TEST_FUNC=['test','params','init']
 
