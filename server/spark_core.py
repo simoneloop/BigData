@@ -95,18 +95,23 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
 def init_map_server(df):
     map = {}
     tmp = []
-    stati = df.select('stato_maggiore').distinct().collect()
+    query_gestione_stati =  df.select('stato_maggiore','stato').distinct().sort(col('stato_maggiore').asc(),col('stato').asc())
+
+    stati =  query_gestione_stati.select('stato_maggiore').distinct().sort(col('stato_maggiore').asc()).collect()
     for s in stati :
         tmp.append(s[0])
 
-    map['stati'] = np.sort(tmp).tolist()
+    map['stati'] = tmp
+    #map['stati'] = np.sort(tmp).tolist()
 
     tmp = []
-    stati_sottostati = df.select('stato').distinct().collect()
+    stati_sottostati = query_gestione_stati.select('stato').collect()
+
     for s in stati_sottostati :
         tmp.append(s[0])
 
-    map['stati_sottostati'] = np.sort(tmp).tolist()
+    map['stati_sottostati'] = tmp
+    #map['stati_sottostati'] = np.sort(tmp).tolist()
 
     inizio = df.select(first('timestamp_inSeconds')).collect()
     fine = df.select(last('timestamp_inSeconds')).collect()
@@ -874,6 +879,8 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
             if (seleziona == 'stati') :
                 label.remove('timestamp_inSeconds')
                 label.remove('sum(timestamp_inSeconds)')
+            elif (seleziona == 'sotto_stati'):
+                label.remove('timestamp_inSeconds')
 
                 pass
             elif (seleziona == 'sotto_stati') :
