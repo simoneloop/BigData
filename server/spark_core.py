@@ -850,17 +850,18 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
             f.append('timestamp_inSeconds')
             f.append('timestamp')
 
+            '''
             if (seleziona == 'stati') :
                 f.append('stato_maggiore')
             elif (seleziona == 'sotto_stati') :
                 f.append('stato')
+            '''
             for i in fonti:
                 f.append(i + '_production')
 
             if (seleziona == 'stati'):
                 df3 = query_stati_maggiore(df2, stati)
-                x1 = df3.select(*f).groupBy('timestamp_inSeconds','timestamp', col('stato_maggiore').alias('stato')).sum()
-                x = x1.sort(col('timestamp_inSeconds').asc())
+                x = df3.select(*f).groupBy('timestamp_inSeconds','timestamp').sum().sort(col('timestamp_inSeconds').asc())
 
 
             elif (seleziona == 'sotto_stati'):
