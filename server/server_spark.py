@@ -27,7 +27,10 @@ ALL_FUNC=['migliorRapportoCo2Kwh',
           'potenzaMediaUtilizzataPerFonti','potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti',
           'potenzaInEsportazioneMedia','potenzaInImportazioneMedia',
           'emissioniInEsportazioneMedia','emissioniInImportazioneMedia',
-          'distribuzioneDellaEnergiaDisponibileNelTempo','distribuzioneDellaEnergiaePotenzaDisponibileNelTempo','distribuzioneDelleEmissioniNelTempo']
+          'distribuzioneDellaEnergiaDisponibileNelTempo',
+          'distribuzioneDellaEnergiaePotenzaDisponibileNelTempo',
+          'distribuzioneDelleEmissioniNelTempo',
+          'dbScan']
 
 TEST_FUNC=['test','params','init']
 
@@ -120,6 +123,10 @@ class SparkServer(BaseHTTPRequestHandler):
                 special = True
             elif (service_address == "distribuzioneDelleEmissioniNelTempo") :
                 rows = distribuzioneDelleEmissioniNelTempo(df1, params)
+                special = True
+
+            elif (service_address == "dbScan"):
+                rows = DBScan(df1, params)
                 special = True
 
             if (rows == BAD_REQUEST) :

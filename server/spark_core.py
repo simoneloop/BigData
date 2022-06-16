@@ -17,6 +17,8 @@ import os
 import math
 import re
 import time
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import MinMaxScaler
 
 
 
@@ -1203,6 +1205,56 @@ def controlloEsistenzaFile():
             print('totalStates.cvs create')
         except:
             print('error create totalStates.csv')
+
+
+#todo DBScan
+def DBScan(df,params):
+    seleziona = params['tipo']
+    giorni = params['giorni']
+    fascia_oraria = params['fascia_oraria']
+    stati = params['stati']
+    fonti = params['fonti']
+
+    df1 = query_timestamp(df, giorni)
+    df2 = query_fascia_oraria(df1, fascia_oraria)
+
+    if (seleziona == 'stati'):
+        df3 = query_stati_maggiore(df2, stati)
+
+    elif (seleziona == 'sotto_stati'):
+        df3 = query_stati(df2, stati)
+
+    f = []
+    f.append('timestamp_inSeconds')
+    f.append('timestamp')
+
+    for i in fonti:
+        f.append(i + '_production')
+
+    if (seleziona == 'stati'):
+        df3 = query_stati_maggiore(df2, stati)
+        x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
+
+    elif (seleziona == 'sotto_stati'):
+        df3 = query_stati(df1, stati)
+        x = df3.select(*f).groupBy('stato').avg()
+
+    pd_data=x.toPandas()
+    states_mapping={}
+    for i in range(len(stati)):
+      states_mapping[stati[i]]=i
+    print(states_mapping)
+    pd_data.loc[:,'stato']=pd_data['stato'].map(states_mapping)
+    pd_data.drop(["stato"], axis=1, inplace=True)
+    pd_data.info()
+    array = pd_data.to_numpy()
+    scaler = MinMaxScaler()
+    array = scaler.fit_transform(array)
+    labels=DBSCAN(eps=0.3,min_samples=1).fit_predict(array)
+    res={}
+    res['stati']=stati
+    res['label']=labels
+    res['value']=[array[:,0],array[:,1]]
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-

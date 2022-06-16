@@ -21,6 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="89e562ba-9df4-438e-94a2-9984dc1b691c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/hs_err_pid14516.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/server/server_spark.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/server_spark.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/spark_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/spark_core.py" afterDir="false" />
     </list>
@@ -211,33 +212,33 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="543" y="178" key="FileChooserDialogImpl/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1652289226822" />
-    <state width="1493" height="168" key="GridCell.Tab.0.bottom" timestamp="1655307972850">
+    <state width="1493" height="409" key="GridCell.Tab.0.bottom" timestamp="1655392419756">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1237" height="8" key="GridCell.Tab.0.bottom/0.0.1536.824/-1280.95.1280.680@-1280.95.1280.680" timestamp="1654790136705" />
     <state width="1301" height="133" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654721607748" />
-    <state width="1493" height="168" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655307972850" />
+    <state width="1493" height="409" key="GridCell.Tab.0.bottom/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655392419756" />
     <state width="1493" height="237" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1654773066960" />
-    <state width="1493" height="168" key="GridCell.Tab.0.center" timestamp="1655307972850">
+    <state width="1493" height="409" key="GridCell.Tab.0.center" timestamp="1655392419755">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1237" height="8" key="GridCell.Tab.0.center/0.0.1536.824/-1280.95.1280.680@-1280.95.1280.680" timestamp="1654790136705" />
     <state width="1301" height="133" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654721607748" />
-    <state width="1493" height="168" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655307972850" />
+    <state width="1493" height="409" key="GridCell.Tab.0.center/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655392419755" />
     <state width="1493" height="237" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1654773066960" />
-    <state width="1493" height="168" key="GridCell.Tab.0.left" timestamp="1655307972850">
+    <state width="1493" height="409" key="GridCell.Tab.0.left" timestamp="1655392419755">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1237" height="8" key="GridCell.Tab.0.left/0.0.1536.824/-1280.95.1280.680@-1280.95.1280.680" timestamp="1654790136705" />
     <state width="1301" height="133" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654721607747" />
-    <state width="1493" height="168" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655307972850" />
+    <state width="1493" height="409" key="GridCell.Tab.0.left/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655392419755" />
     <state width="1493" height="237" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1654773066960" />
-    <state width="1493" height="168" key="GridCell.Tab.0.right" timestamp="1655307972850">
+    <state width="1493" height="409" key="GridCell.Tab.0.right" timestamp="1655392419756">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1237" height="8" key="GridCell.Tab.0.right/0.0.1536.824/-1280.95.1280.680@-1280.95.1280.680" timestamp="1654790136705" />
     <state width="1301" height="133" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@-1680.27.1344.800" timestamp="1654721607748" />
-    <state width="1493" height="168" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655307972850" />
+    <state width="1493" height="409" key="GridCell.Tab.0.right/0.0.1536.824/-1680.27.1344.800@0.0.1536.824" timestamp="1655392419756" />
     <state width="1493" height="237" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1654773066960" />
     <state width="1470" height="261" key="GridCell.Tab.1.bottom" timestamp="1653757066154">
       <screen x="0" y="0" width="1536" height="824" />
@@ -268,7 +269,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/BigData$spark_coreprova.coverage" NAME="spark_coreprova Coverage Results" MODIFIED="1653762382461" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/BigData$spark_core.coverage" NAME="spark_core Coverage Results" MODIFIED="1653757249188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/BigData$server_spark.coverage" NAME="server_spark Coverage Results" MODIFIED="1655307972834" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
+    <SUITE FILE_PATH="coverage/BigData$server_spark.coverage" NAME="server_spark Coverage Results" MODIFIED="1655392419717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/server" />
     <SUITE FILE_PATH="coverage/BigData$prova.coverage" NAME="prova Coverage Results" MODIFIED="1653228495377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
