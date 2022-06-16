@@ -835,6 +835,9 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
 
         if(len(stati) == 1):
 
+            if(re.search(stati[0], '(')):
+                pass
+
             seleziona = params['tipo']
             giorni = params['giorni']
             fascia_oraria = params['fascia_oraria']
@@ -894,7 +897,7 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
 
                 tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
                 # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
-                val_array_new=[0]*(len(label)+1)
+                val_array_new=[0]*(len(label))
 
                 for i in range(len(label)):
                     val_array_new[i]=float(0)
