@@ -126,7 +126,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 special = True
 
             elif (service_address == "dbScan"):
-                rows = DBScan(df1, params)
+                rows = dbScan(df1, params)
                 special = True
 
             if (rows == BAD_REQUEST) :

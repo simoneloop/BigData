@@ -1207,8 +1207,10 @@ def controlloEsistenzaFile():
             print('error create totalStates.csv')
 
 
-#todo DBScan
-def DBScan(df,params):
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--dbScan--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--dbScan--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+
+def dbScan(df,params):
     seleziona = params['tipo']
     giorni = params['giorni']
     fascia_oraria = params['fascia_oraria']
@@ -1223,22 +1225,51 @@ def DBScan(df,params):
 
     elif (seleziona == 'sotto_stati'):
         df3 = query_stati(df2, stati)
-
+    else :
+        return BAD_REQUEST
     f = []
-    f.append('timestamp_inSeconds')
-    f.append('timestamp')
+
+    f.append('stato')
+    if (seleziona == 'stati'):
+        f.append('stato_maggiore')
 
     for i in fonti:
         f.append(i + '_production')
+    for i in fonti :
+        f.append(i + '_emissions')
 
     if (seleziona == 'stati'):
-        df3 = query_stati_maggiore(df2, stati)
-        x = df3.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
+        df4 = query_stati_maggiore(df3, stati)
+        x = df4.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
 
     elif (seleziona == 'sotto_stati'):
-        df3 = query_stati(df1, stati)
-        x = df3.select(*f).groupBy('stato').avg()
+        df4 = query_stati(df3, stati)
+        x = df4.select(*f).groupBy('stato').avg()
 
+    cols = x.columns[1 :]
+
+    array = np.array(cols)
+
+    newarray = np.array_split(array , 2)
+    array_uno=newarray[0].tolist()
+    array_due=newarray[1].tolist()
+
+    print(array_uno)
+    print(array_due)
+    from pyspark.sql.functions import  when
+    x.show()
+    #total_p = sum([when(math.isnan(col(x[array_uno[i]]))==False,col(x[array_uno[i]]).otherwise(0)) for i in range(len(array_uno))])
+    #total_e = sum([when(True,col(array_due[i]).otherwise(0)) for i in range(len(array_due))])
+    newdf = x.withColumn('total', sum(x[coldf] for coldf in x.columns[1:]))
+    newdf.show()
+    #x.withColumn("totalp", total_p).show()
+    #x1 = x.withColumn('total_p', sum(x([colx]) for colx in x.columns[1 :]))
+    #x = x.withColumn('total_e', sum(x[colx] for colx in array_due))
+
+    #newdf = df.withColumn('total', sum(df[col] for col in df.columns))
+
+    #x1.show()
+    '''
     pd_data=x.toPandas()
     states_mapping={}
     for i in range(len(stati)):
@@ -1255,7 +1286,7 @@ def DBScan(df,params):
     res['stati']=stati
     res['label']=labels
     res['value']=[array[:,0],array[:,1]]
-
+    '''
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 if __name__ == '__main__':
