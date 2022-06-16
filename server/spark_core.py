@@ -835,8 +835,6 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
 
         if(len(stati) == 1):
 
-            #if(re.search(stati[0], '(')):
-                #pass
 
             seleziona = params['tipo']
             giorni = params['giorni']
@@ -874,7 +872,10 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
 
             label=colonna
             if (seleziona == 'stati') :
-                label.remove('sun(timestamp_inSeconds)')
+                label.remove('timestamp_inSeconds')
+                label.remove('sum(timestamp_inSeconds)')
+
+                pass
             elif (seleziona == 'sotto_stati') :
                 pass
 
