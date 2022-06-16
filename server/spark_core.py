@@ -835,8 +835,8 @@ def distribuzioneDellaPotenzaDisponibileNelTempo(df, params):#todo ok
 
         if(len(stati) == 1):
 
-            if(re.search(stati[0], '(')):
-                pass
+            #if(re.search(stati[0], '(')):
+                #pass
 
             seleziona = params['tipo']
             giorni = params['giorni']
