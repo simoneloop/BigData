@@ -876,17 +876,12 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
         res = []
         tmplabel = []
 
-        if (seleziona == 'stati') :
 
-            for l in range(len(label)) :
-                tmpLabel = label[l].split("(")
-                tmpLabel = tmpLabel[len(tmpLabel) - 1]
-                tmpLabel = tmpLabel.replace(")", "")
-                tmplabel.append(tmpLabel + ' (KWh)')
-        elif (seleziona == 'sotto_stati'):
-            for l in label :
-                tmplabel.append(l + ' (KWh)')
-
+        for l in range(len(label)) :
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmplabel.append(tmpLabel + ' (KWh)')
 
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
@@ -948,7 +943,7 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaEnergiaePotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDellaEnergiaePotenzaDisponibileNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :# todo ok
+def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
     try :
         seleziona = params['tipo']
         giorni = params['giorni']
@@ -990,26 +985,17 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :# todo ok
         tmplabel = []
 
         xyz=0
-        if (seleziona == 'stati') :
+        for l in range(len(label)) :
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            if(xyz == 0):
+                xyz=1
+                tmplabel.append(tmpLabel + ' (KWh)')
+            else :
+                xyz = 0
+                tmplabel.append(tmpLabel + ' (KW)')
 
-            for l in range(len(label)) :
-                tmpLabel = label[l].split("(")
-                tmpLabel = tmpLabel[len(tmpLabel) - 1]
-                tmpLabel = tmpLabel.replace(")", "")
-                if(xyz == 0):
-                    xyz=1
-                    tmplabel.append(tmpLabel + ' (KWh)')
-                else :
-                    xyz = 0
-                    tmplabel.append(tmpLabel + ' (KW)')
-        elif (seleziona == 'sotto_stati') :
-            for l in label :
-                if(xyz == 0):
-                    xyz=1
-                    tmplabel.append(l + ' (KWh)')
-                else:
-                    xyz = 0
-                    tmplabel.append(l + ' (KW)')
 
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
@@ -1111,16 +1097,12 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
         res = []
         tmplabel = []
 
-        if (seleziona == 'stati') :
 
-            for l in range(len(label)) :
-                tmpLabel = label[l].split("(")
-                tmpLabel = tmpLabel[len(tmpLabel) - 1]
-                tmpLabel = tmpLabel.replace(")", "")
-                tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
-        elif (seleziona == 'sotto_stati') :
-            for l in label :
-                tmplabel.append(l + ' (Kg di CO₂eq per minuto)')
+        for l in range(len(label)) :
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
 
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
