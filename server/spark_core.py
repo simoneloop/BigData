@@ -998,18 +998,18 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :# todo ok
                 tmpLabel = tmpLabel.replace(")", "")
                 if(xyz == 0):
                     xyz=1
-                    tmplabel.append(tmpLabel + ' (KW)')
+                    tmplabel.append(tmpLabel + ' (KWh)')
                 else :
                     xyz = 0
-                    tmplabel.append(tmpLabel + ' (KWh)')
+                    tmplabel.append(tmpLabel + ' (KW)')
         elif (seleziona == 'sotto_stati') :
             for l in label :
                 if(xyz == 0):
                     xyz=1
-                    tmplabel.append(l + ' (KW)')
+                    tmplabel.append(l + ' (KWh)')
                 else:
                     xyz = 0
-                    tmplabel.append(l + ' (KWh)')
+                    tmplabel.append(l + ' (KW)')
 
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
