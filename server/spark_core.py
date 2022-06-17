@@ -1287,10 +1287,10 @@ def dbScan(df,params):
     tmp_3 = scaler.fit_transform(tmp_3)
 
     vet=[]
-    for i in tmp_3:
+    for i in range(len(tmp_3[0])):
         tmp_dir = {}
-        tmp_dir['x'] = i[0]
-        tmp_dir['y'] = i[1]
+        tmp_dir['x'] = tmp_3[0][i]
+        tmp_dir['y'] = tmp_3[1][i]
         tmp_dir['r'] = 3
         vet.append(tmp_dir)
 
