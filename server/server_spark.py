@@ -27,12 +27,10 @@ ALL_FUNC=['migliorRapportoCo2Kwh',
           'potenzaMediaUtilizzataPerFonti','potenzaMediaInstallataPerFonti','emissioniMediaCO2eqMinutoPerFonti',
           'potenzaInEsportazioneMedia','potenzaInImportazioneMedia',
           'emissioniInEsportazioneMedia','emissioniInImportazioneMedia',
-          'distribuzioneDellaEnergiaDisponibileNelTempo',
-          'distribuzioneDellaEnergiaePotenzaDisponibileNelTempo',
-          'distribuzioneDelleEmissioniNelTempo',
+          'distribuzioneDellaEnergiaDisponibileNelTempo','distribuzioneDellaEnergiaePotenzaDisponibileNelTempo','distribuzioneDelleEmissioniNelTempo',
           'dbScan']
 
-TEST_FUNC=['test','params','init']
+TEST_FUNC=['test','params','init','dead']
 
 
 def get_params(path) :
@@ -57,7 +55,7 @@ def get_params(path) :
 def get_service_address(path):
     serviceAddress=path
     if ('?' in path) :
-        serviceAddress=path.split("?")[0]
+        serviceAddress = path.split("?")[0]
         serviceAddress = serviceAddress.split("/")
         serviceAddress = serviceAddress[len(serviceAddress) - 2]
 
@@ -67,11 +65,12 @@ def get_service_address(path):
 
 class SparkServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        params=get_params(self.path)
         service_address=get_service_address(self.path)
+        params=get_params(self.path)
 
-        print(params)
-        print(service_address)
+        #print(service_address)
+        #print(params)
+
         special=False
         if(service_address in ALL_FUNC):
             self.send_response(200)
@@ -158,6 +157,10 @@ class SparkServer(BaseHTTPRequestHandler):
             elif (service_address == "init"):
                 self.wfile.write(json.dumps(INIT_MAP).encode())
 
+            elif (service_address == "dead"):
+                return -1
+
+
         else:
             self.send_response(404)
 
@@ -166,68 +169,103 @@ class SparkServer(BaseHTTPRequestHandler):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def server():
 
-    print("Run Spark")
-    spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+        print("Run Spark...")
+        x=1/0
+        spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
 
-    df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
+        df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
-    df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
-    df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
+        df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
+        df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
 
-    df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
-    '''
-    averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
-    df = df.join(averaged,
-                 (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
-                 "inner").drop(df.timestamp).drop(df.stato_maggiore)
-    '''
-    df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
+        df = df.withColumn("stato_maggiore", stato_maggiore(df["stato"]))
+        '''
+        averaged = df.select('timestamp', 'stato_maggiore', 'carbon_intensity').groupBy('timestamp', 'stato_maggiore').avg()
+        df = df.join(averaged,
+                     (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
+                     "inner").drop(df.timestamp).drop(df.stato_maggiore)
+        '''
+        df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
-    df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
+        df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
 
 
-    #todo Gestione potenza ed emissioni import
-    df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
+        #todo Gestione potenza ed emissioni import
+        df = df.withColumn("sum_import", sum_import_export(df['exchange_import']))
 
-    df = df.withColumn("sum_import_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
+        df = df.withColumn("sum_import_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
 
-    df = df.withColumn("sum_import_emissions", sum_import_export_emissions(df['exchange_import']))
+        df = df.withColumn("sum_import_emissions", sum_import_export_emissions(df['exchange_import']))
 
-    df = df.withColumn("sum_import_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
-    #todo Gestione potenza ed emissioni import
+        df = df.withColumn("sum_import_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_import'],df['stato_maggiore']))
+        #todo Gestione potenza ed emissioni import
 
-    #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-    #todo Gestione potenza ed emissioni export
-    df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
+        #todo Gestione potenza ed emissioni export
+        df = df.withColumn("sum_export", sum_import_export(df['exchange_export']))
 
-    df = df.withColumn("sum_export_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
+        df = df.withColumn("sum_export_stato_maggiore", sum_import_export_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
 
-    df = df.withColumn("sum_export_emissions", sum_import_export_emissions(df['exchange_export']))
+        df = df.withColumn("sum_export_emissions", sum_import_export_emissions(df['exchange_export']))
 
-    df = df.withColumn("sum_export_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
-    #todo Gestione potenza ed emissioni export
+        df = df.withColumn("sum_export_emissions_stato_maggiore", sum_import_export_emissions_stato_maggiore(df['exchange_export'],df['stato_maggiore']))
+        #todo Gestione potenza ed emissioni export
 
-    #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-    #todo Gestione timestamp in secondi
-    df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union_new])
-    #todo Gestione timestamp in secondi
+        #todo Gestione timestamp in secondi
+        df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union_new])
+        #todo Gestione timestamp in secondi
 
-    #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-    global df1
-    df1 = df.cache()
-    global INIT_MAP
-    INIT_MAP = init_map_server(df1)
+        #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        global df1
+        df1 = df.cache()
+        global INIT_MAP
+        INIT_MAP = init_map_server(df1)
 
-    #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-    server_address=(HOST,PORT)
-    server=HTTPServer(server_address,SparkServer)
-    print('Server running on port %s' % PORT)
-    server.serve_forever()
+        server_address=(HOST,PORT)
+        server=HTTPServer(server_address,SparkServer)
+        print('Server Running on http://%s:%s/' % (HOST,PORT))
+        #print('Server running on port %s' % PORT)
+        server.serve_forever()
 
 
 if __name__=='__main__':
-    server()
+    # http://localhost:8080/
+    '''
+    tents = 1
+    while(tents <= 3):
+        if(not(serverIsRunning)):
+            serverIsRunning=True
+            print('Run Server...', tents)
+            tents += 1
+            server()
+        else:
+            time.sleep(10)
+    '''
+
+    tents=3
+    serverIsRunning=False
+    canStart=True
+    while(tents > 0):
+            try :
+                if (not (serverIsRunning) and canStart) :
+                    canStart = not canStart
+                    serverIsRunning = not serverIsRunning
+                    tents -= 1
+                    print('Run Server...', tents)
+                    server()
+
+                else :
+                    time.sleep(10)
+
+            except Exception as e:
+                print(e)
+
+                print('Run Server is not running!!!')
+
+
 
