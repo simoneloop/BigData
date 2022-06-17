@@ -1265,9 +1265,10 @@ def dbScan(df,params):
     array_uno=newarray[0]
     array_due=newarray[1]
 
-    vet=[]
+
     for j in range(len(dfnew['stato'])):
-        tmp_dir={}
+        tmp_1 = []
+        tmp_2 = []
         p = 0
         e = 0
         for i in range(len(array_uno)):
@@ -1277,9 +1278,20 @@ def dbScan(df,params):
                p+= val_new_p
             if not math.isnan(float(val_new_e)) :
                e+= val_new_e
-        tmp_dir['x'] = p
-        tmp_dir['y'] = e
-        tmp_dir['r'] = 1
+        tmp_1.append(p)
+        tmp_2.append(e)
+
+    tmp_3=[tmp_1,tmp_2]
+
+    scaler = MinMaxScaler()
+    tmp_3 = scaler.fit_transform(tmp_3)
+
+    vet=[]
+    for i in tmp_3:
+        tmp_dir = {}
+        tmp_dir['x'] = i[0]
+        tmp_dir['y'] = i[1]
+        tmp_dir['r'] = 3
         vet.append(tmp_dir)
 
     map['value'] = vet
@@ -1287,9 +1299,10 @@ def dbScan(df,params):
 
     dfnew.drop(['stato'], axis=1, inplace=True)
 
-    array = dfnew.to_numpy()
     scaler = MinMaxScaler()
+    array = dfnew.to_numpy()
     array = scaler.fit_transform(array)
+
     labels = DBSCAN(eps=0.3, min_samples=1).fit_predict(array)
 
     map['label'] =  labels.tolist()
