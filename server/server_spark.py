@@ -30,7 +30,7 @@ ALL_FUNC=['migliorRapportoCo2Kwh',
           'distribuzioneDellaEnergiaDisponibileNelTempo','distribuzioneDellaEnergiaePotenzaDisponibileNelTempo','distribuzioneDelleEmissioniNelTempo',
           'dbScan']
 
-TEST_FUNC=['test','params','init','dead']
+TEST_FUNC=['test','params','init']
 
 
 def get_params(path) :
@@ -157,10 +157,6 @@ class SparkServer(BaseHTTPRequestHandler):
             elif (service_address == "init"):
                 self.wfile.write(json.dumps(INIT_MAP).encode())
 
-            elif (service_address == "dead"):
-                return -1
-
-
         else:
             self.send_response(404)
 
@@ -170,7 +166,7 @@ class SparkServer(BaseHTTPRequestHandler):
 def server():
 
         print("Run Spark...")
-        x=1/0
+
         spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
 
         df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
@@ -225,7 +221,7 @@ def server():
         INIT_MAP = init_map_server(df1)
 
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
+        x=1/0
         server_address=(HOST,PORT)
         server=HTTPServer(server_address,SparkServer)
         print('Server Running on http://%s:%s/' % (HOST,PORT))
@@ -247,25 +243,27 @@ if __name__=='__main__':
             time.sleep(10)
     '''
 
-    tents=3
+    tents=1
     serverIsRunning=False
     canStart=True
-    while(tents > 0):
+    while(tents < 3):
             try :
                 if (not (serverIsRunning) and canStart) :
-                    canStart = not canStart
                     serverIsRunning = not serverIsRunning
-                    tents -= 1
+                    canStart = not canStart
                     print('Run Server...', tents)
+                    tents += 1
                     server()
 
                 else :
                     time.sleep(10)
+                    if(not(serverIsRunning)):
+                        canStart = not canStart
 
             except Exception as e:
                 print(e)
-
                 print('Run Server is not running!!!')
+                serverIsRunning = not serverIsRunning
 
 
 
