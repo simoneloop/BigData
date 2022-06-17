@@ -1265,10 +1265,10 @@ def dbScan(df,params):
     array_uno=newarray[0]
     array_due=newarray[1]
 
-
+    tmp_1 = []
+    tmp_2 = []
     for j in range(len(dfnew['stato'])):
-        tmp_1 = []
-        tmp_2 = []
+
         p = 0
         e = 0
         for i in range(len(array_uno)):
@@ -1280,18 +1280,20 @@ def dbScan(df,params):
                e+= val_new_e
         tmp_1.append(p)
         tmp_2.append(e)
-
-    tmp_3=[tmp_1,tmp_2]
-
-    scaler = MinMaxScaler()
-    tmp_3 = scaler.fit_transform(tmp_3)
-
+    # tmp_1=np.array(tmp_1).reshape(-1, 1)
+    # tmp_2=np.array(tmp_2).reshape(-1, 1)
+    # scaler1 = MinMaxScaler()
+    # tmp_1 = scaler1.fit_transform(tmp_1)
+    # scaler2 = MinMaxScaler()
+    # tmp_2 = scaler2.fit_transform(tmp_2)
+    # tmp_3=[tmp_1.tolist(),tmp_2.tolist()]
+    tmp_3 = [tmp_1, tmp_2]
     vet=[]
     for i in range(len(tmp_3[0])):
         tmp_dir = {}
         tmp_dir['x'] = tmp_3[0][i]
         tmp_dir['y'] = tmp_3[1][i]
-        tmp_dir['r'] = 3
+        tmp_dir['r'] = 10
         vet.append(tmp_dir)
 
     map['value'] = vet
