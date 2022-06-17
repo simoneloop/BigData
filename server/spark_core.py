@@ -1191,130 +1191,115 @@ def creazioneFile():
             df = pd.concat([df, pd.read_csv(path1 + f)])
     df.to_csv(path1 + "totalStates" + ".csv", index=False)
 
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
-def controlloEsistenzaFile():
-
-    if os.path.isfile(path+'/totalStates.csv') :
-        print("totalStates.cvs File exist")
-    else :
-        print("File not exist")
-        print("create file...")
-        try:
-            creazioneFile()
-            print('totalStates.cvs create')
-        except:
-            print('error create totalStates.csv')
-
-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--dbScan--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--dbScan--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 
 def dbScan(df,params):
-    seleziona = params['tipo']
-    giorni = params['giorni']
-    fascia_oraria = params['fascia_oraria']
-    stati = params['stati']
-    fonti = params['fonti']
+    try:
+        seleziona = params['tipo']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        stati = params['stati']
+        fonti = params['fonti']
 
-    df1 = query_timestamp(df, giorni)
-    df2 = query_fascia_oraria(df1, fascia_oraria)
+        try:
+            eps = float(params['eps'])
+            if(eps <=0):
+                eps = float(0.3)
+        except Exception as e:
+            print(e)
+            eps = float(0.3)
+        try:
+            min_samples = int(params['ms'])
+            if(min_samples < 1):
+                min_samples = 1
+        except Exception as e:
+            print(e)
+            min_samples = 1
 
-    f = []
-    f.append('stato')
 
-    if (seleziona == 'stati'):
-        df3 = query_stati_maggiore(df2, stati)
-        f.append('stato_maggiore')
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
 
-    elif (seleziona == 'sotto_stati'):
-        df3 = query_stati(df2, stati)
-    else :
+        f = []
+        f.append('stato')
+
+        if (seleziona == 'stati'):
+            df3 = query_stati_maggiore(df2, stati)
+            f.append('stato_maggiore')
+
+        elif (seleziona == 'sotto_stati'):
+            df3 = query_stati(df2, stati)
+        else :
+            return BAD_REQUEST
+
+        for i in fonti:
+            f.append(i + '_production')
+        for i in fonti :
+            f.append(i + '_emissions')
+
+        if (seleziona == 'stati'):
+            df4 = query_stati_maggiore(df3, stati)
+            x = df4.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
+
+        elif (seleziona == 'sotto_stati'):
+            df4 = query_stati(df3, stati)
+            x = df4.select(*f).groupBy('stato').avg()
+
+
+        dfnew = x.toPandas()
+        dfnew.fillna(0,inplace=True)
+
+        tmpstato=[]
+        for s in dfnew['stato']:
+            tmpstato.append(s)
+
+
+        colonne = dfnew.columns.tolist()
+        colonne.remove('stato')
+        colonne = np.array_split(colonne , 2)
+
+        colonne_production = colonne[0]
+        colonne_emissions = colonne[1]
+
+        tmp_val = []
+        numcol_p_e = len(colonne_production)
+        for j in range(len(dfnew['stato'])):
+            tmp_dir = {}
+            p = 0
+            e = 0
+            for i in range(numcol_p_e):
+                val_new_p = dfnew[colonne_production[i]].to_numpy()[j]
+                val_new_e = dfnew[colonne_emissions[i]].to_numpy()[j]
+                if not math.isnan(float(val_new_p)) :
+                    p += val_new_p
+                if not math.isnan(float(val_new_e)) :
+                    e += val_new_e
+            tmp_dir['x'] = p
+            tmp_dir['y'] = e
+            tmp_dir['r'] = 10
+            tmp_val.append(tmp_dir)
+
+
+        dfnew.drop(['stato'], axis=1, inplace=True)
+
+        scaler = MinMaxScaler()
+        array = dfnew.to_numpy()
+        array = scaler.fit_transform(array)
+
+        #tmp_label = DBSCAN(eps=0.3, min_samples=1).fit_predict(array)
+        tmp_label = DBSCAN(eps = eps, min_samples = min_samples).fit_predict(array)
+
+
+        map={}
+        map['stati'] = tmpstato
+        map['value'] = tmp_val
+        map['label'] = tmp_label.tolist()
+
+        return [map]
+    except Exception as e:
+        print(e)
         return BAD_REQUEST
-
-    for i in fonti:
-        f.append(i + '_production')
-    for i in fonti :
-        f.append(i + '_emissions')
-
-    if (seleziona == 'stati'):
-        df4 = query_stati_maggiore(df3, stati)
-        x = df4.select(*f).groupBy('stato', 'stato_maggiore').avg().groupBy(col('stato_maggiore').alias('stato')).sum()
-
-    elif (seleziona == 'sotto_stati'):
-        df4 = query_stati(df3, stati)
-        x = df4.select(*f).groupBy('stato').avg()
-
-    x.show()
-
-    map={}
-
-    dfnew = x.toPandas()
-    dfnew.fillna(0,inplace=True)
-
-    tmps=[]
-    for s in dfnew['stato']:
-        tmps.append(s)
-
-    map['stati'] = tmps
-
-    array = dfnew.columns.tolist()
-    array.remove('stato')
-    newarray = np.array_split(array , 2)
-
-    array_uno=newarray[0]
-    array_due=newarray[1]
-
-    tmp_1 = []
-    tmp_2 = []
-    for j in range(len(dfnew['stato'])):
-
-        p = 0
-        e = 0
-        for i in range(len(array_uno)):
-            val_new_p = dfnew[array_uno[i]].to_numpy()[j]
-            val_new_e = dfnew[array_due[i]].to_numpy()[j]
-            if not math.isnan(float(val_new_p)) :
-               p+= val_new_p
-            if not math.isnan(float(val_new_e)) :
-               e+= val_new_e
-        tmp_1.append(p)
-        tmp_2.append(e)
-    # tmp_1=np.array(tmp_1).reshape(-1, 1)
-    # tmp_2=np.array(tmp_2).reshape(-1, 1)
-    # scaler1 = MinMaxScaler()
-    # tmp_1 = scaler1.fit_transform(tmp_1)
-    # scaler2 = MinMaxScaler()
-    # tmp_2 = scaler2.fit_transform(tmp_2)
-    # tmp_3=[tmp_1.tolist(),tmp_2.tolist()]
-    tmp_3 = [tmp_1, tmp_2]
-    vet=[]
-    for i in range(len(tmp_3[0])):
-        tmp_dir = {}
-        tmp_dir['x'] = tmp_3[0][i]
-        tmp_dir['y'] = tmp_3[1][i]
-        tmp_dir['r'] = 10
-        vet.append(tmp_dir)
-
-    map['value'] = vet
-
-
-    dfnew.drop(['stato'], axis=1, inplace=True)
-
-    scaler = MinMaxScaler()
-    array = dfnew.to_numpy()
-    array = scaler.fit_transform(array)
-
-    labels = DBSCAN(eps=0.3, min_samples=1).fit_predict(array)
-
-    map['label'] =  labels.tolist()
-
-
-    res=[]
-    res.append(map)
-    print(res)
-    return res
-
     #todo map['value'] = [{x : array[0][0], y :array[0][1], r = 1}, {x : array[1][0], y:array[1][1], r = 1}, {x : array[2][0], y[2][1], r = 1}, ecc]
 
 
@@ -1361,6 +1346,21 @@ def dbScan(df,params):
     res['label']=labels
     res['value']=[array[:,0],array[:,1]]
     '''
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--controlloEsistenzaFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+def controlloEsistenzaFile():
+
+    if os.path.isfile(path+'/totalStates.csv') :
+        print("totalStates.cvs File exist")
+    else :
+        print("File not exist")
+        print("create file...")
+        try:
+            creazioneFile()
+            print('totalStates.cvs create')
+        except:
+            print('error create totalStates.csv')
+
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--MAIN--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 if __name__ == '__main__':
