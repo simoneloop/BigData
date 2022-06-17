@@ -221,7 +221,7 @@ def server():
         INIT_MAP = init_map_server(df1)
 
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-        x=1/0
+
         server_address=(HOST,PORT)
         server=HTTPServer(server_address,SparkServer)
         print('Server Running on http://%s:%s/' % (HOST,PORT))
@@ -246,7 +246,7 @@ if __name__=='__main__':
     tents=1
     serverIsRunning=False
     canStart=True
-    while(tents < 3):
+    while(tents <= 3):
             try :
                 if (not (serverIsRunning) and canStart) :
                     serverIsRunning = not serverIsRunning
