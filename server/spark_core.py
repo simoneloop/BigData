@@ -1220,18 +1220,17 @@ def dbScan(df,params):
     df1 = query_timestamp(df, giorni)
     df2 = query_fascia_oraria(df1, fascia_oraria)
 
+    f = []
+    f.append('stato')
+
     if (seleziona == 'stati'):
         df3 = query_stati_maggiore(df2, stati)
+        f.append('stato_maggiore')
 
     elif (seleziona == 'sotto_stati'):
         df3 = query_stati(df2, stati)
     else :
         return BAD_REQUEST
-    f = []
-
-    f.append('stato')
-    if (seleziona == 'stati'):
-        f.append('stato_maggiore')
 
     for i in fonti:
         f.append(i + '_production')
@@ -1246,6 +1245,65 @@ def dbScan(df,params):
         df4 = query_stati(df3, stati)
         x = df4.select(*f).groupBy('stato').avg()
 
+    x.show()
+
+    map={}
+
+    dfnew = x.toPandas()
+    dfnew.fillna(0,inplace=True)
+
+    tmps=[]
+    for s in dfnew['stato']:
+        tmps.append(s)
+
+    map['stati'] = tmps
+
+    array = dfnew.columns.tolist()
+    array.remove('stato')
+    newarray = np.array_split(array , 2)
+
+    array_uno=newarray[0]
+    array_due=newarray[1]
+
+    vet=[]
+    for j in range(len(dfnew['stato'])):
+        tmp_dir={}
+        p = 0
+        e = 0
+        for i in range(len(array_uno)):
+            val_new_p = dfnew[array_uno[i]].to_numpy()[j]
+            val_new_e = dfnew[array_due[i]].to_numpy()[j]
+            if not math.isnan(float(val_new_p)) :
+               p+= val_new_p
+            if not math.isnan(float(val_new_e)) :
+               e+= val_new_e
+        tmp_dir['x'] = p
+        tmp_dir['y'] = e
+        tmp_dir['r'] = 1
+        vet.append(tmp_dir)
+
+    map['value'] = vet
+
+
+    dfnew.drop(['stato'], axis=1, inplace=True)
+
+    array = dfnew.to_numpy()
+    scaler = MinMaxScaler()
+    array = scaler.fit_transform(array)
+    labels = DBSCAN(eps=0.3, min_samples=1).fit_predict(array)
+
+    map['label'] =  labels.tolist()
+
+
+    res=[]
+    res.append(map)
+    print(res)
+    return res
+
+    #todo map['value'] = [{x : array[0][0], y :array[0][1], r = 1}, {x : array[1][0], y:array[1][1], r = 1}, {x : array[2][0], y[2][1], r = 1}, ecc]
+
+
+    '''
     cols = x.columns[1 :]
 
     array = np.array(cols)
@@ -1269,6 +1327,7 @@ def dbScan(df,params):
     #newdf = df.withColumn('total', sum(df[col] for col in df.columns))
 
     #x1.show()
+    '''
     '''
     pd_data=x.toPandas()
     states_mapping={}
