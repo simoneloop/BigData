@@ -1,3 +1,5 @@
+import http.server
+
 import findspark
 findspark.init()
 
@@ -30,7 +32,7 @@ ALL_FUNC=['migliorRapportoCo2Kwh',
           'distribuzioneDellaEnergiaDisponibileNelTempo','distribuzioneDellaEnergiaePotenzaDisponibileNelTempo','distribuzioneDelleEmissioniNelTempo',
           'dbScan']
 
-TEST_FUNC=['test','params','init']
+TEST_FUNC=['test','params','init','dead']
 
 
 def get_params(path) :
@@ -157,6 +159,13 @@ class SparkServer(BaseHTTPRequestHandler):
             elif (service_address == "init"):
                 self.wfile.write(json.dumps(INIT_MAP).encode())
 
+            elif (service_address == "dead"):
+                map = {}
+                map['dead'] = "dead";
+                response = json.dumps(map)
+                self.wfile.write(response.encode())
+
+
         else:
             self.send_response(404)
 
@@ -164,10 +173,11 @@ class SparkServer(BaseHTTPRequestHandler):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--server--*-*-*--*-*-*--server--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def server():
-
+    try:
         print("Run Spark...")
 
         spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
+        #spark.stop
 
         df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
 
@@ -229,20 +239,24 @@ def server():
         server.serve_forever()
 
 
+    except Exception as e :
+        print(e)
+        print('SPARK SERVER is not running!')
+        return -1
+
 if __name__=='__main__':
     # http://localhost:8080/
-    '''
+
+
     tents = 1
     while(tents <= 3):
-        if(not(serverIsRunning)):
-            serverIsRunning=True
-            print('Run Server...', tents)
-            tents += 1
-            server()
-        else:
-            time.sleep(10)
-    '''
+        print('Run Server...', tents)
+        tents += 1
+        server()
+        time.sleep(10)
 
+
+    '''
     tents=1
     serverIsRunning=False
     canStart=True
@@ -264,6 +278,6 @@ if __name__=='__main__':
                 print(e)
                 print('Run Server is not running!!!')
                 serverIsRunning = not serverIsRunning
-
+    '''
 
 
