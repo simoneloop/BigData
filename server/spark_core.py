@@ -29,7 +29,9 @@ precedent_dates_filters=None
 new_date_filter=None
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
+
 stato_maggiore = udf(lambda x: get_stato_maggiore(x), StringType())
+timestamp_HH = udf(lambda x: get_timestamp_HH(x), StringType())
 fascia_oraria = udf(lambda x: get_fascia_oraria(x), StringType())
 map_consumo = udf(lambda x, y, z: get_consumo(x, y, z), FloatType())
 
@@ -55,7 +57,7 @@ col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emis
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
 
-col_union    = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
+col_union    = ['timestamp_HH','timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
                'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
                'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
@@ -67,7 +69,7 @@ col_union    = ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_int
                'exchange_export','sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
                'exchange_import','sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
 
-col_union_new= ['timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','total_production','total_emissions','consumo',
+col_union_new= ['timestamp_HH','timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','total_production','total_emissions','consumo',
                'nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
                'biomassa_emissions','carbone_installed_capacity','carbone_production','carbone_emissions','eolico_installed_capacity','eolico_production',
@@ -218,7 +220,6 @@ def get_sum_import_export_emissions_stato_maggiore(x,y):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_stato_maggiore--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*--*-*-*--*-*-*-
 def get_stato_maggiore(x):
-
     try:
         return x.split("(")[1].replace(")", "")
     except:
@@ -227,18 +228,32 @@ def get_stato_maggiore(x):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_fascia_oraria(x):
+    try:
+        hh = x.split(":")[0]
+        hh = int(hh)
+        if (hh >= 00 and hh < 6):
+            return "notte"
+        elif (hh >= 6 and hh < 12):
+            return "mattina"
+        elif (hh >= 12 and hh < 18):
+            return "pomeriggio"
+        elif (hh >= 18 and hh <= 23):
+            return "sera"
+    except:
+        return "..."
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
+def get_timestamp_HH(x):
+    #Todo 01:10 06-05-2022
+    try:
+        y = x.split(":")
 
-    hh = x.split(":")[0]
-    hh = int(hh)
-    if (hh >= 00 and hh < 6):
-        return "notte"
-    elif (hh >= 6 and hh < 12):
-        return "mattina"
-    elif (hh >= 12 and hh < 18):
-        return "pomeriggio"
-    elif (hh >= 18 and hh <= 23):
-        return "sera"
+        hh=y[0]
+        gg=y[1].split(" ")[1]
 
+        return hh +":00 "+ gg
+    except:
+        return x
 #todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_consumo(x,y,z):
@@ -860,19 +875,20 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
 
         f = []
         f.append('timestamp_inSeconds')
-        f.append('timestamp')
+        #f.append('timestamp')
+        f.append('timestamp_HH')
 
         for i in fonti :
             f.append(i + '_production')
 
-        x = df3.select(*f).groupBy('timestamp_inSeconds', 'timestamp').sum().sort(col('timestamp_inSeconds').asc())
-
+        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
+        #x.show()
         dfnew = x.toPandas()
         colonna = dfnew.columns.tolist()
 
         label = colonna
-        label.remove('timestamp')
-        label.remove('timestamp_inSeconds')
+        label.remove('timestamp_HH')
+        #label.remove('timestamp_inSeconds')
         label.remove('sum(timestamp_inSeconds)')
 
 
@@ -886,6 +902,25 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
             tmpLabel = tmpLabel.replace(")", "")
             tmplabel.append(tmpLabel + ' (KWh)')
 
+        for j in range(len(dfnew['timestamp_HH'])):
+            tmpMap = {}
+            tmpvalue = []
+            tmpMap['timestamp'] = dfnew['timestamp_HH'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+        #print(res)
+        '''
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
 
@@ -916,7 +951,7 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
             tmpMap['label'] = tmplabel
 
             res.append(tmpMap)
-
+        '''
         '''
         for j in range(len(dfnew['stato'])):
             tmpMap={}

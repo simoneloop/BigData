@@ -67,10 +67,12 @@ def get_service_address(path):
 
 class SparkServer(BaseHTTPRequestHandler):
     def do_GET(self):
+        start = time.time()
+
         service_address=get_service_address(self.path)
         params=get_params(self.path)
 
-        #print(service_address)
+        print(service_address+" START!!!")
         #print(params)
 
         special=False
@@ -138,7 +140,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 else:
                     files = [json.loads(row[0]) for row in rows]
             self.wfile.write(json.dumps(files).encode())
-
+            print(service_address + " END (ALL_FUNC)!!! -> Tempo = "+ time.time() - start)
         elif(service_address in TEST_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
@@ -166,6 +168,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 self.wfile.write(response.encode())
 
 
+            print(service_address + " END (TEST_FUNC)!!! -> Tempo = "+ time.time() - start)
         else:
             self.send_response(404)
 
@@ -191,6 +194,8 @@ def server():
                      (df['timestamp'] == averaged['timestamp']) & (df['stato_maggiore'] == averaged['stato_maggiore']),
                      "inner").drop(df.timestamp).drop(df.stato_maggiore)
         '''
+        df = df.withColumn("timestamp_HH", timestamp_HH(df["timestamp"]))
+
         df = df.withColumn("fascia_oraria", fascia_oraria(df["timestamp"]))
 
         df = df.withColumn("consumo", map_consumo(df['total_production'], df['exchange_import'], df['exchange_export']))
@@ -230,7 +235,7 @@ def server():
         df1 = df.cache()
         global INIT_MAP
         INIT_MAP = init_map_server(df1)
-
+        #df1.show()
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
         server_address=(HOST,PORT)
