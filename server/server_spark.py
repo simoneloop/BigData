@@ -225,6 +225,7 @@ def server():
         #todo Gestione timestamp in secondi
 
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+        #df = df.fillna(0)
         global df1
         df1 = df.cache()
         global INIT_MAP

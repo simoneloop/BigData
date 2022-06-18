@@ -127,7 +127,8 @@ def init_map_server(df):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export(x):
-    sum= 0
+    sum= float(0.0)
+
     try :
         n = x.split("@")
         for i in n:
@@ -135,19 +136,19 @@ def get_sum_import_export(x):
                 try :
                     value = i.split("_")[2]
                     if (value == "nan"):
-                        value = 0
+                        value = float(0.0)
                     sum += float(value)
                 except Exception as e:
                     print(e)
                     sum += 0
     except Exception as e:
         #print(e)
-        sum += 0
+        sum += float(0.0)
     return sum
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_stato_maggiore(x,y):
-    sum= 0
+    sum= float(0.0)
     lenstato=len(y)
     try :
         n = x.split("@")
@@ -162,16 +163,16 @@ def get_sum_import_export_stato_maggiore(x,y):
 
                 except Exception as e:
                     print(e)
-                    sum += 0
+                    sum += float(0.0)
     except Exception as e:
         #print(e)
-        sum += 0
+        sum += float(0.0)
     return sum
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_emissions(x):
-    sum= 0
+    sum= float(0.0)
     try :
         n = x.split("@")
         for i in n:
@@ -179,20 +180,20 @@ def get_sum_import_export_emissions(x):
                 try :
                     value = i.split("_")[3]
                     if (value == "nan"):
-                        value = 0
+                        value = float(0.0)
                     sum += float(value)
                 except Exception as e:
                     print(e)
-                    sum += 0
+                    sum += float(0.0)
     except Exception as e:
         #print(e)
-        sum += 0
+        sum += float(0.0)
     return sum
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_emissions_stato_maggiore(x,y):
-    sum= 0
+    sum= float(0.0)
     lenstato=len(y)
     try :
         n = x.split("@")
@@ -207,10 +208,10 @@ def get_sum_import_export_emissions_stato_maggiore(x,y):
 
                 except Exception as e:
                     print(e)
-                    sum += 0
+                    sum += float(0.0)
     except Exception as e:
         #print(e)
-        sum += 0
+        sum += float(0.0)
     return sum
 
 
@@ -242,8 +243,8 @@ def get_fascia_oraria(x):
 #todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_consumo(x,y,z):
 
-    import_q = 0
-    export_q = 0
+    import_q = float(0.0)
+    export_q = float(0.0)
     try:
         n=y.split("@")
         for i in n:
@@ -251,14 +252,14 @@ def get_consumo(x,y,z):
                 try:
                     value = i.split("_")[2]
                     if (value == "nan"):
-                        value = 0
+                        value = float(0.0)
                     import_q+= float(value)
                 except Exception as e:
                     print(e)
-                    import_q += 0
+                    import_q += float(0.0)
     except Exception as e:
         #print(e)
-        import_q += 0
+        import_q += float(0.0)
 
     try :
         n = z.split("@")
@@ -267,14 +268,14 @@ def get_consumo(x,y,z):
                 try :
                     value=i.split("_")[2]
                     if(value=="nan"):
-                        value=0
+                        value = float(0.0)
                     export_q += float(value)
                 except Exception as e:
                     print(e)
-                    export_q += 0
+                    export_q += float(0.0)
     except Exception as e:
         #print(e)
-        export_q += 0
+        export_q += float(0.0)
 
     cont = float(x) + import_q + export_q
     return cont
@@ -282,7 +283,7 @@ def get_consumo(x,y,z):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_production(x,y):
-    import_q = 0
+    import_q = float(0.0)
 
     try:
         n = y.split("@")
@@ -295,16 +296,16 @@ def get_new_total_production(x,y):
                     import_q += float(value)
                 except Exception as e:
                     print(e)
-                    import_q += 0
+                    import_q += float(0.0)
     except Exception as e:
         # print(e)
-        import_q += 0
+        import_q += float(0.0)
     return float(x)-import_q
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_emissions(x,y):
-    import_q = 0
+    import_q = float(0.0)
 
     try:
         n = y.split("@")
@@ -313,14 +314,14 @@ def get_new_total_emissions(x,y):
                 try:
                     value=i.split("_")[3]
                     if(value=="nan"):
-                        value=0
+                        value=float(0.0)
                     import_q += float(value)
                 except Exception as e:
                     print(e)
-                    import_q += 0
+                    import_q += float(0.0)
     except Exception as e:
         # print(e)
-        import_q += 0
+        import_q += float(0.0)
     return float(x)-import_q
 
 
@@ -535,7 +536,7 @@ def potenzaInEsportazioneMedia(df,params):#todo ok
             x = x.select(col('stato'), col("avg(sum_export)").alias('value'))
         else:
             return BAD_REQUEST
-        x.show(40)#todo---
+
         x = x.withColumn("label", lit('Potenza Media Disponibile in Esportazione (KW)'))
 
         return x.select(to_json(struct('*')).alias("json")).collect()
