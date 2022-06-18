@@ -1003,24 +1003,30 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
 
         f = []
         f.append('timestamp_inSeconds')
-        f.append('timestamp')
+        # f.append('timestamp')
+        f.append('timestamp_HH')
+
+
 
         for i in fonti :
             f.append(i + '_production')
             f.append(i + '_installed_capacity')
 
-        x = df3.select(*f).groupBy('timestamp_inSeconds', 'timestamp').sum().sort(col('timestamp_inSeconds').asc())
-
+        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
+        # x.show()
         dfnew = x.toPandas()
         colonna = dfnew.columns.tolist()
 
         label = colonna
-        label.remove('timestamp')
-        label.remove('timestamp_inSeconds')
+        label.remove('timestamp_HH')
+        #label.remove('timestamp_inSeconds')
         label.remove('sum(timestamp_inSeconds)')
+
 
         res = []
         tmplabel = []
+
+
 
         xyz=0
         for l in range(len(label)) :
@@ -1035,33 +1041,20 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
                 tmplabel.append(tmpLabel + ' (KW)')
 
 
-        j = 0
-        while (j < len(dfnew['timestamp_inSeconds'])) :
-
+        for j in range(len(dfnew['timestamp_HH'])):
             tmpMap = {}
+            tmpvalue = []
+            tmpMap['timestamp'] = dfnew['timestamp_HH'].to_numpy()[j]
 
-            tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
-            # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
-            val_array_new = [0] * (len(label))
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
 
-            for i in range(len(label)) :
-                val_array_new[i] = float(0)
-            for k in range(6) :
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
 
-                for i in range(len(label)) :
-                    v = dfnew[label[i]].to_numpy()[j]
-                    if (math.isnan(v)) :
-                        val_array_new[i] = val_array_new[i] + float(0)
-                    else :
-                        val_array_new[i] = val_array_new[i] + float(v)
-                j = j + 1
-
-            for i in range(len(label)) :
-                val_array_new[i] = val_array_new[i] / float(6)
-            # tmpvalue.append(val_array_new)
-
-            # print(val_array_new)
-            tmpMap['value'] = val_array_new
+            tmpMap['value'] = tmpvalue
             tmpMap['label'] = tmplabel
 
             res.append(tmpMap)
@@ -1117,31 +1110,50 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
 
         f = []
         f.append('timestamp_inSeconds')
-        f.append('timestamp')
+        # f.append('timestamp')
+        f.append('timestamp_HH')
 
         for i in fonti :
             f.append(i + '_emissions')
 
-        x = df3.select(*f).groupBy('timestamp_inSeconds', 'timestamp').sum().sort(col('timestamp_inSeconds').asc())
-
+        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
+        # x.show()
         dfnew = x.toPandas()
         colonna = dfnew.columns.tolist()
 
         label = colonna
-        label.remove('timestamp')
-        label.remove('timestamp_inSeconds')
+        label.remove('timestamp_HH')
+        # label.remove('timestamp_inSeconds')
         label.remove('sum(timestamp_inSeconds)')
 
         res = []
         tmplabel = []
 
-
         for l in range(len(label)) :
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
+            tmplabel.append(tmpLabel + ' (KWh)')
 
+        for j in range(len(dfnew['timestamp_HH'])) :
+            tmpMap = {}
+            tmpvalue = []
+            tmpMap['timestamp'] = dfnew['timestamp_HH'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+        # print(res)
+        '''
         j = 0
         while (j < len(dfnew['timestamp_inSeconds'])) :
 
@@ -1172,7 +1184,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
             tmpMap['label'] = tmplabel
 
             res.append(tmpMap)
-
+        '''
         '''
         for j in range(len(dfnew['stato'])):
             tmpMap={}

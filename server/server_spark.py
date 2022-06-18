@@ -140,7 +140,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 else:
                     files = [json.loads(row[0]) for row in rows]
             self.wfile.write(json.dumps(files).encode())
-            print(service_address + " END (ALL_FUNC)!!! -> Tempo = "+ time.time() - start)
+            print(service_address + " END (ALL_FUNC)!!! -> Tempo = ", (time.time() - start))
         elif(service_address in TEST_FUNC):
             self.send_response(200)
             self.send_header('content-type', 'application/json')
@@ -168,7 +168,7 @@ class SparkServer(BaseHTTPRequestHandler):
                 self.wfile.write(response.encode())
 
 
-            print(service_address + " END (TEST_FUNC)!!! -> Tempo = "+ time.time() - start)
+            print(service_address + " END (TEST_FUNC)!!! -> Tempo = ", (time.time() - start))
         else:
             self.send_response(404)
 
