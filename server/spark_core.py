@@ -527,16 +527,17 @@ def potenzaInEsportazioneMedia(df,params):#todo ok
 
         if(seleziona=='stati'):
             df3= query_stati_maggiore(df2,stati)
-            x = df3.select('stato','stato_maggiore','sum_export_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_stato_maggiore))').desc())
+            x = df3.select('stato','stato_maggiore','sum_export_stato_maggiore').groupBy('stato','stato_maggiore').avg().groupBy('stato_maggiore').sum().sort(col('sum(avg(sum_export_stato_maggiore))').asc())
             x = x.select(col('stato_maggiore').alias('stato'), col('sum(avg(sum_export_stato_maggiore))').alias('value'))
         elif(seleziona=='sotto_stati'):
             df3 = query_stati(df2, stati)
-            x = df3.select('stato','sum_export').groupBy('stato').avg().sort(col('avg(sum_export)').desc())
+            x = df3.select('stato','sum_export').groupBy('stato').avg().sort(col('avg(sum_export)').asc())
             x = x.select(col('stato'), col("avg(sum_export)").alias('value'))
         else:
             return BAD_REQUEST
-
+        x.show(40)#todo---
         x = x.withColumn("label", lit('Potenza Media Disponibile in Esportazione (KW)'))
+
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
         return BAD_REQUEST
@@ -689,7 +690,6 @@ def potenzaMediaUtilizzataPerFonti(df, params):#todo ok
 
             tmpMap['value'] = tmpvalue
             tmpMap['label'] = tmplabel
-
             res.append(tmpMap)
 
         return res

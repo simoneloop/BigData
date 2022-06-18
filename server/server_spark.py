@@ -180,7 +180,7 @@ def server():
         #spark.stop
 
         df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
-
+        df = df.fillna(0)
         df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
         df = df.withColumn("total_emissions", repair_total_emissions(df['total_emissions'], df['exchange_import']))
 
