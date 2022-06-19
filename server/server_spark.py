@@ -190,6 +190,7 @@ def server():
         spark = SparkSession.builder.master("local[*]").appName('Core').getOrCreate()
         #spark.stop
 
+        spark.catalog.clearCache()
         df = spark.read.csv(path + "/totalstates.csv", header=True, inferSchema=True)
         df = df.fillna(0)
         df = df.withColumn("total_production", repair_total_production(df['total_production'], df['exchange_import']))
