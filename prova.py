@@ -1,10 +1,11 @@
+import numpy
 import numpy as np
 from PIL import Image
 import cv2
 
 
 if __name__=='__main__':
-    img =cv2.imread('spark.png',cv2.IMREAD_GRAYSCALE)
+    img =cv2.imread('400 bad request.png',cv2.IMREAD_GRAYSCALE)
 
     th, img_b = cv2.threshold(img, 128, 255, cv2.THRESH_OTSU)
 
@@ -32,19 +33,28 @@ if __name__=='__main__':
     '''
     res = []
     i=0
+    k=0
     while(i < img_b.shape[1]-1):
         j=img_b.shape[0]-1
         while(j > 0):
-            if (img_b[j][i] < 100) :
-                map={}
-                map['x'] = i
-                map['y'] = 168-j
-                map['v'] = 1
-                res.append(map)
+            if (img_b[j][i] < 100):
+                if(k % 10 == 0):
+                    k+=1
+                    map={}
+                    map['x'] = i
+                    map['y'] = img_b.shape[0]-j
+                    map['r'] = 5
+                    res.append(map)
+                else:
+                    k+=1
             j=j-1
         i=i+1
 
-    print(res)
+
+    with open('400.txt', 'w') as fp :
+        fp.write("%s" %  res)
+        #for r in res: fp.write("%s," % r)
+
     '''
     
     for i in range(img_b.shape[0]):
