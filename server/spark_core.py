@@ -25,8 +25,8 @@ from sklearn.preprocessing import MinMaxScaler
 #n_core = multiprocessing.cpu_count()
 path = "../statesCSV"
 
-precedent_dates_filters=None
-new_date_filter=None
+#precedent_dates_filters=None
+#new_date_filter=None
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-UDF*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*--*-*-*--*-*-*--*--*-*-*--*-*-*-
 
@@ -50,12 +50,17 @@ BAD_REQUEST='bad request'
 bad_request={}
 bad_request['error']= BAD_REQUEST
 
-fasce_MPSN = ['mattina 06:00-11:59','pomeriggio 12:00-17:59','sera 18:00-22:59','notte 23:00-05:59']
-fonti = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
+fasce_MPSN = ['prima_mattina 04:00-07:59', 'mattina 08:00-11:59', 'pomeriggio 12:00-15:59',
+              'tardo_pomeriggio 16:00-19:59', 'sera 20:00-23:59', 'notte 00:00-03:59']
 
+fonti      = ['nucleare','geotermico','biomassa','carbone','eolico','fotovoltaico','idroelettrico','accumuloidro','batterieaccu','gas','petrolio','sconosciuto']
+
+
+'''
 col_static = ['timestamp_inMillis', 'timestamp' , 'carbon_intensity' , 'low_emissions' , 'renewable_emissions',
               'total_production', 'total_emissions', 'exchange_export', 'exchange_import', 'stato', 'consumo',
               'fascia_oraria']
+
 
 col_union    = ['timestamp_HH','timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','avg(carbon_intensity)','low_emissions','renewable_emissions',
                'total_production','total_emissions','consumo','nucleare_installed_capacity','nucleare_production','nucleare_emissions',
@@ -68,7 +73,7 @@ col_union    = ['timestamp_HH','timestamp','fascia_oraria','stato_maggiore','sta
                'sconosciuto_production','sconosciuto_emissions',
                'exchange_export','sum_export','sum_export_stato_maggiore','sum_export_emissions','sum_export_emissions_stato_maggiore',
                'exchange_import','sum_import','sum_import_stato_maggiore','sum_import_emissions','sum_import_emissions_stato_maggiore']
-
+'''
 col_union_new= ['timestamp_HH','timestamp','fascia_oraria','stato_maggiore','stato','carbon_intensity','total_production','total_emissions','consumo',
                'nucleare_installed_capacity','nucleare_production','nucleare_emissions',
                'geotermico_installed_capacity','geotermico_production','geotermico_emissions','biomassa_installed_capacity','biomassa_production',
@@ -97,52 +102,56 @@ col_pro =       ['sum(total_production)','sum(total_emissions)','sum(nucleare_in
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--init_map_server--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def init_map_server(df):
-    map = {}
-    tmp = []
-    query_gestione_stati =  df.select('stato_maggiore','stato').distinct().sort(col('stato_maggiore').asc(),col('stato').asc())
+    try:
+        map = {}
+        tmp = []
+        query_gestione_stati =  df.select('stato_maggiore','stato').distinct().sort(col('stato_maggiore').asc(),col('stato').asc())
 
-    stati =  query_gestione_stati.select('stato_maggiore').distinct().sort(col('stato_maggiore').asc()).collect()
-    for s in stati :
-        tmp.append(s[0])
+        stati =  query_gestione_stati.select('stato_maggiore').distinct().sort(col('stato_maggiore').asc()).collect()
+        for s in stati :
+            tmp.append(s[0])
 
-    map['stati'] = tmp
-    #map['stati'] = np.sort(tmp).tolist()
+        map['stati'] = tmp
+        #map['stati'] = np.sort(tmp).tolist()
 
-    tmp = []
-    stati_sottostati = query_gestione_stati.select('stato').collect()
+        tmp = []
+        stati_sottostati = query_gestione_stati.select('stato').collect()
 
-    for s in stati_sottostati :
-        tmp.append(s[0])
+        for s in stati_sottostati :
+            tmp.append(s[0])
 
-    map['stati_sottostati'] = tmp
-    #map['stati_sottostati'] = np.sort(tmp).tolist()
+        map['stati_sottostati'] = tmp
+        #map['stati_sottostati'] = np.sort(tmp).tolist()
 
-    inizio = df.select(first('timestamp_inSeconds')).collect()
-    fine = df.select(last('timestamp_inSeconds')).collect()
+        inizio = df.select(first('timestamp_inSeconds')).collect()
+        fine = df.select(last('timestamp_inSeconds')).collect()
 
-    map['start_time'] = inizio[0]
-    map['end_time'] = fine[0]
-    map['fonti'] = np.sort(fonti).tolist()
-    map['time_slots'] = fasce_MPSN
+        map['start_time'] = inizio[0]
+        map['end_time'] = fine[0]
+        map['fonti'] = np.sort(fonti).tolist()
+        map['time_slots'] = fasce_MPSN
 
-    return map
+        return map
+    except Exception as e:
+        print(e)
+
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export(x):
-    sum= float(0.0)
+    try:
+        sum= float(0.0)
 
-    try :
         n = x.split("@")
         for i in n:
             if (i):
                 try :
                     value = i.split("_")[2]
-                    if (value == "nan"):
-                        value = float(0.0)
-                    sum += float(value)
+                    if (value != "nan"):
+                        sum += float(value)
+
                 except Exception as e:
-                    print(e)
-                    sum += 0
+                    #print(e)
+                    sum += float(0.0)
     except Exception as e:
         #print(e)
         sum += float(0.0)
@@ -150,9 +159,10 @@ def get_sum_import_export(x):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_stato_maggiore--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_stato_maggiore(x,y):
-    sum= float(0.0)
-    lenstato=len(y)
     try :
+        sum= float(0.0)
+        lenstato=len(y)
+
         n = x.split("@")
         for i in n:
             if (i):
@@ -160,11 +170,11 @@ def get_sum_import_export_stato_maggiore(x,y):
                     val = i.split("_")
                     value = val[2]
                     s = val[0]
-                    if value != "nan" and (not re.search(y, s) or lenstato == len(s)) :
+                    if value != "nan" and (lenstato == len(s) or not(re.search(y, s))):
                         sum += float(value)
 
                 except Exception as e:
-                    print(e)
+                    #print(e)
                     sum += float(0.0)
     except Exception as e:
         #print(e)
@@ -174,18 +184,19 @@ def get_sum_import_export_stato_maggiore(x,y):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_emissions(x):
-    sum= float(0.0)
     try :
+        sum= float(0.0)
+
         n = x.split("@")
         for i in n:
             if (i):
                 try :
                     value = i.split("_")[3]
-                    if (value == "nan"):
-                        value = float(0.0)
-                    sum += float(value)
+                    if (value != "nan"):
+                        sum += float(value)
+
                 except Exception as e:
-                    print(e)
+                    #print(e)
                     sum += float(0.0)
     except Exception as e:
         #print(e)
@@ -195,9 +206,10 @@ def get_sum_import_export_emissions(x):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export_emissioni_stato_maggiore*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 def get_sum_import_export_emissions_stato_maggiore(x,y):
-    sum= float(0.0)
-    lenstato=len(y)
     try :
+        sum= float(0.0)
+        lenstato=len(y)
+
         n = x.split("@")
         for i in n:
             if (i):
@@ -205,11 +217,11 @@ def get_sum_import_export_emissions_stato_maggiore(x,y):
                     val = i.split("_")
                     value = val[3]
                     s = val[0]
-                    if value != "nan" and (not re.search(y, s) or lenstato == len(s)) :
+                    if value != "nan" and (lenstato == len(s) or not(re.search(y, s))):
                         sum += float(value)
 
                 except Exception as e:
-                    print(e)
+                    #print(e)
                     sum += float(0.0)
     except Exception as e:
         #print(e)
@@ -229,16 +241,27 @@ def get_stato_maggiore(x):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_fascia_oraria(x):
     try:
+        #mattina 08 : 12
+        #pome 12 : 16
+        #tardopome 16 : 20
+        #sera 20 : 00
+        #notte 00 : 04
+        #prima mattina 04 : 08
         hh = x.split(":")[0]
         hh = int(hh)
-        if (hh >= 00 and hh < 6):
+        if (hh >= 0 and hh < 4 ):
             return "notte"
-        elif (hh >= 6 and hh < 12):
+        elif (hh >= 4 and hh < 8):
+            return "prima mattina"
+        elif (hh >= 8 and hh < 12):
             return "mattina"
-        elif (hh >= 12 and hh < 18):
+        elif (hh >= 12 and hh < 16):
             return "pomeriggio"
-        elif (hh >= 18 and hh <= 23):
+        elif (hh >= 16 and hh < 20):
+            return "tardo pomeriggio"
+        elif (hh >= 20 and hh <= 23):
             return "sera"
+        #fasce_MPSN = ['prima mattina 04:00-07:59','mattina 08:00-11:59', 'pomeriggio 12:00-15:59', 'tardo pomeriggio 16:00-19:59', 'sera 20:00-23:59', 'notte 00:00-03:59']
     except:
         return "..."
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_fascia_oraria--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
@@ -257,24 +280,26 @@ def get_timestamp_HH(x):
 #todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_consumo--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_consumo(x,y,z):
+    try :
 
-    import_q = float(0.0)
-    export_q = float(0.0)
-    try:
+        import_q = float(0.0)
+        export_q = float(0.0)
         n=y.split("@")
         for i in n:
             if (i):
                 try:
                     value = i.split("_")[2]
-                    if (value == "nan"):
-                        value = float(0.0)
-                    import_q+= float(value)
+                    if (value != "nan"):
+                        import_q += float(value)
+
                 except Exception as e:
-                    print(e)
-                    import_q += float(0.0)
+                    pass
+                    #print(e)
+                    #import_q += float(0.0)
     except Exception as e:
+        pass
         #print(e)
-        import_q += float(0.0)
+        #import_q += float(0.0)
 
     try :
         n = z.split("@")
@@ -282,61 +307,67 @@ def get_consumo(x,y,z):
             if (i):
                 try :
                     value=i.split("_")[2]
-                    if(value=="nan"):
-                        value = float(0.0)
-                    export_q += float(value)
-                except Exception as e:
-                    print(e)
-                    export_q += float(0.0)
-    except Exception as e:
-        #print(e)
-        export_q += float(0.0)
+                    if(value!="nan"):
+                        export_q += float(value)
 
-    cont = float(x) + import_q + export_q
-    return cont
+                except Exception as e:
+                    pass
+                    #print(e)
+                    #export_q += float(0.0)
+    except Exception as e:
+        pass
+        #print(e)
+        #export_q += float(0.0)
+
+    return float(x) + import_q + export_q
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_production--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_production(x,y):
-    import_q = float(0.0)
-
     try:
+
+        import_q = float(0.0)
         n = y.split("@")
         for i in n:
             if (i):
                 try:
                     value=i.split("_")[2]
-                    if(value=="nan"):
-                        value=0
-                    import_q += float(value)
+                    if(value!="nan"):
+                        import_q += float(value)
+
                 except Exception as e:
-                    print(e)
-                    import_q += float(0.0)
+                    pass
+                    #print(e)
+                    #import_q += float(0.0)
     except Exception as e:
-        # print(e)
-        import_q += float(0.0)
+        pass
+        #print(e)
+        #import_q += float(0.0)
+
     return float(x)-import_q
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_new_total_emissions--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 def get_new_total_emissions(x,y):
-    import_q = float(0.0)
+    try :
 
-    try:
+        import_q = float(0.0)
         n = y.split("@")
         for i in n:
             if (i):
                 try:
                     value=i.split("_")[3]
-                    if(value=="nan"):
-                        value=float(0.0)
-                    import_q += float(value)
+                    if(value!="nan"):
+                        import_q += float(value)
+
                 except Exception as e:
-                    print(e)
-                    import_q += float(0.0)
+                    pass
+                    #print(e)
+                    #import_q += float(0.0)
     except Exception as e:
+        pass
         # print(e)
-        import_q += float(0.0)
+        #import_q += float(0.0)
     return float(x)-import_q
 
 
@@ -381,28 +412,38 @@ def query_timestamp(df, giorni):
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_fascia_oraria(df, fasce):
-    fasce_tmp = []
-    for s in fasce:
-        fasce_tmp.append('fascia_oraria="' + s + '"')
+    if(fasce[0] == "TUTTO"):
+        return df
+    else:
+        fasce_tmp = []
+        for s in fasce:
+            fasce_tmp.append('fascia_oraria="' + s + '"')
 
-    return df.filter(" or ".join(fasce_tmp))
+        return df.filter(" or ".join(fasce_tmp))
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_stati(df, stati):
-    stati_tmp=[]
-    for s in stati:
-        stati_tmp.append('stato="'+s+'"')
+    if(stati[0] == "SELEZIONA TUTTI GLI STATI"):
+        return df
 
-    return df.filter(" or ".join(stati_tmp))
+    else:
+        stati_tmp=[]
+        for s in stati:
+            stati_tmp.append('stato="'+s+'"')
+
+        return df.filter(" or ".join(stati_tmp))
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 def query_stati_maggiore(df, stati):
-    stati_maggiore_tmp=[]
-    for s in stati:
-        stati_maggiore_tmp.append('stato_maggiore="'+s+'"')
-    return df.filter(" or ".join(stati_maggiore_tmp))
+    if(stati[0] == "SELEZIONA TUTTI GLI STATI"):
+        return df
+    else:
+        stati_maggiore_tmp=[]
+        for s in stati:
+            stati_maggiore_tmp.append('stato_maggiore="'+s+'"')
+        return df.filter(" or ".join(stati_maggiore_tmp))
 
 '''
 def query_fonte(df, fonti):
@@ -435,12 +476,12 @@ def migliorRapportoCo2Kwh(df,params):#todo ok
             x = df3.select('stato', 'carbon_intensity').groupBy('stato').avg().sort(col('avg(carbon_intensity)').desc())
             x = x.select(col('stato'), col("avg(carbon_intensity)").alias('value'))
         else:
-            return 'bad request'
+            return BAD_REQUEST
 
         x = x.withColumn("label", lit('Intensità di carbonio (gCO₂eq/kWh)'))
         return x.select(to_json(struct('*')).alias("json")).collect()
     except:
-        return 'bad request'
+        return BAD_REQUEST
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--potenzaMediaKW--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
@@ -975,7 +1016,7 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
         return res
 
     except Exception as e:
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 
@@ -1082,7 +1123,7 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
         return res
 
     except Exception as e :
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 
@@ -1133,7 +1174,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel + ' (KWh)')
+            tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
 
         for j in range(len(dfnew['timestamp_HH'])) :
             tmpMap = {}
@@ -1208,7 +1249,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
         return res
 
     except Exception as e :
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 

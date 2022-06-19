@@ -36,41 +36,49 @@ TEST_FUNC=['test','params','init','dead']
 
 
 def get_params(path) :
-    path = path.replace("%", " ")
-    if ('?' in path) :
-        param = path.split('?')[1]
+    try:
+        path = path.replace("%", " ")
+        if ('?' in path) :
+            param = path.split('?')[1]
 
-        params = param.split("&")
-        res = {}
-        for p in params :
-            tmp = p.split("=")
+            params = param.split("&")
+            res = {}
+            for p in params :
+                tmp = p.split("=")
 
-            if ("[" in tmp[1] or "]" in tmp[1]) :
-                list = tmp[1].strip('][').split(',')
-                res[tmp[0]] = list
-            else :
-                res[tmp[0]] = tmp[1]
-        return res
-    else :
-        return None
+                if ("[" in tmp[1] or "]" in tmp[1]) :
+                    list = tmp[1].strip('][').split(',')
+                    res[tmp[0]] = list
+                else :
+                    res[tmp[0]] = tmp[1]
+            return res
+        else :
+            return None
+    except:
+        return BAD_REQUEST
 
 def get_service_address(path):
-    serviceAddress=path
-    if ('?' in path) :
-        serviceAddress = path.split("?")[0]
+    try:
+        serviceAddress=path
+        if ('?' in path) :
+            serviceAddress = path.split("?")[0]
+            serviceAddress = serviceAddress.split("/")
+            serviceAddress = serviceAddress[len(serviceAddress) - 2]
+
         serviceAddress = serviceAddress.split("/")
-        serviceAddress = serviceAddress[len(serviceAddress) - 2]
-
-    serviceAddress = serviceAddress.split("/")
-    serviceAddress = serviceAddress[len(serviceAddress) - 1]
-    return serviceAddress
-
+        serviceAddress = serviceAddress[len(serviceAddress) - 1]
+        return serviceAddress
+    except:
+        return BAD_REQUEST
 class SparkServer(BaseHTTPRequestHandler):
     def do_GET(self):
         start = time.time()
 
         service_address=get_service_address(self.path)
         params=get_params(self.path)
+
+        if(params == BAD_REQUEST or service_address == BAD_REQUEST):
+            self.wfile.write(json.dumps(bad_request).encode())
 
         print(service_address+" START!!!")
         #print(params)
