@@ -237,13 +237,19 @@ def server():
         #todo Gestione timestamp in secondi
         df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union_new])
         #todo Gestione timestamp in secondi
-        df.show()
+        #df.show()
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
         #df = df.fillna(0)
         global df1
         df1 = df.cache()
         global INIT_MAP
+        INIT_MAP = None
         INIT_MAP = init_map_server(df1)
+
+        if(INIT_MAP == None):
+            return -1
+        else:
+            print('INIT_MAP OK!!!')
         #df1.show()
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -264,7 +270,7 @@ if __name__=='__main__':
 
 
     tents = 1
-    while(tents <= 3):
+    while(tents <= 10):
         print('Run Server...', tents)
         tents += 1
         server()
