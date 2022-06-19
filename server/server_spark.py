@@ -236,7 +236,7 @@ def server():
         #todo Gestione timestamp in secondi
         df = df.select([unix_timestamp(("timestamp"), "HH:mm dd-MM-yyyy").alias("timestamp_inSeconds"), *col_union_new])
         #todo Gestione timestamp in secondi
-
+        df.show()
         #todo *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-cache()-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
         #df = df.fillna(0)
         global df1

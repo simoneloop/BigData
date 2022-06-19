@@ -133,7 +133,7 @@ def init_map_server(df):
 
         return map
     except Exception as e:
-        print(e)
+        #print(e)
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--get_sum_import_export--*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*-*--*-*-*--*-*-*-
@@ -751,7 +751,7 @@ def potenzaMediaUtilizzataPerFonti(df, params):#todo ok
 
         return res
     except Exception as e:
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 
@@ -819,7 +819,7 @@ def potenzaMediaInstallataPerFonti(df, params):#todo ok
 
         return res
     except Exception as e:
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 
@@ -887,7 +887,7 @@ def emissioniMediaCO2eqMinutoPerFonti(df, params):#todo ok
 
         return res
     except Exception as e:
-        print(e)
+        #print(e)
         return BAD_REQUEST
 
 
@@ -1296,14 +1296,14 @@ def dbScan(df,params):
             if(eps <=0):
                 eps = float(0.3)
         except Exception as e:
-            print(e)
+            #print(e)
             eps = float(0.3)
         try:
             min_samples = int(params['ms'])
             if(min_samples < 1):
                 min_samples = 1
         except Exception as e:
-            print(e)
+            #print(e)
             min_samples = 1
 
 
@@ -1387,7 +1387,7 @@ def dbScan(df,params):
 
         return [map]
     except Exception as e:
-        print(e)
+        #print(e)
         return BAD_REQUEST
     #todo map['value'] = [{x : array[0][0], y :array[0][1], r = 1}, {x : array[1][0], y:array[1][1], r = 1}, {x : array[2][0], y[2][1], r = 1}, ecc]
 
