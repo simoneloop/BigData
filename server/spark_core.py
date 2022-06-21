@@ -906,33 +906,43 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
         df1 = query_timestamp(df, giorni)
         df2 = query_fascia_oraria(df1, fascia_oraria)
 
-        if (seleziona == 'stati') :
-            df3 = query_stati_maggiore(df2, stati)
-
-        elif (seleziona == 'sotto_stati') :
-            df3 = query_stati(df2, stati)
-
-        else :
-            return BAD_REQUEST
-
         f = []
+        f.append('stato')
+        if (seleziona == 'stati'):
+            f.append('stato_maggiore')
         f.append('timestamp_inSeconds')
-        #f.append('timestamp')
         f.append('timestamp_HH')
 
         for i in fonti :
             f.append(i + '_production')
 
-        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
-        #x.show()
+        if (seleziona == 'stati'):
+            df3 = query_stati_maggiore(df2, stati)
+            df3.show(300)
+            x = df3.select(*f).groupBy('timestamp_HH','stato','stato_maggiore').avg()
+            x.show(300)
+            #.groupBy('timestamp_HH',col('stato_maggiore').alias('stato')).sum().groupBy('timestamp_HH').sum().sort(col('sum(sum(avg(timestamp_inSeconds)))').asc())
+
+
+        elif (seleziona == 'sotto_stati'):
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('timestamp_HH','stato').avg().groupBy('timestamp_HH').sum().sort(col('sum(avg(timestamp_inSeconds))').asc())
+
+        else :
+            return BAD_REQUEST
+
+
         dfnew = x.toPandas()
         colonna = dfnew.columns.tolist()
 
         label = colonna
         label.remove('timestamp_HH')
         #label.remove('timestamp_inSeconds')
-        label.remove('sum(timestamp_inSeconds)')
-
+        if (seleziona == 'stati') :
+            label.remove('sum(sum(avg(timestamp_inSeconds)))')
+            #label.remove('stato')
+        elif (seleziona == 'sotto_stati'):
+            label.remove('sum(avg(timestamp_inSeconds))')
 
         res = []
         tmplabel = []
@@ -1017,7 +1027,7 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
         return res
 
     except Exception as e:
-        #print(e)
+        print(e)
         return BAD_REQUEST
 
 
