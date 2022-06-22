@@ -918,10 +918,8 @@ def distribuzioneDellaEnergiaDisponibileNelTempo(df, params):#todo ok
 
         if (seleziona == 'stati'):
             df3 = query_stati_maggiore(df2, stati)
-            df3.show(300)
-            x = df3.select(*f).groupBy('timestamp_HH','stato','stato_maggiore').avg()
-            x.show(300)
-            #.groupBy('timestamp_HH',col('stato_maggiore').alias('stato')).sum().groupBy('timestamp_HH').sum().sort(col('sum(sum(avg(timestamp_inSeconds)))').asc())
+
+            x = df3.select(*f).groupBy('timestamp_HH','stato','stato_maggiore').avg().groupBy('timestamp_HH',col('stato_maggiore').alias('stato')).sum().groupBy('timestamp_HH').sum().sort(col('sum(sum(avg(timestamp_inSeconds)))').asc())
 
 
         elif (seleziona == 'sotto_stati'):
@@ -1044,139 +1042,45 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
         df1 = query_timestamp(df, giorni)
         df2 = query_fascia_oraria(df1, fascia_oraria)
 
-        if (seleziona == 'stati') :
-            df3 = query_stati_maggiore(df2, stati)
-
-        elif (seleziona == 'sotto_stati') :
-            df3 = query_stati(df2, stati)
-
-        else :
-            return BAD_REQUEST
-
         f = []
+        f.append('stato')
+        if (seleziona == 'stati') :
+            f.append('stato_maggiore')
         f.append('timestamp_inSeconds')
-        # f.append('timestamp')
         f.append('timestamp_HH')
-
-
 
         for i in fonti :
             f.append(i + '_production')
             f.append(i + '_installed_capacity')
 
-        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
-        # x.show()
-        dfnew = x.toPandas()
-        colonna = dfnew.columns.tolist()
-
-        label = colonna
-        label.remove('timestamp_HH')
-        #label.remove('timestamp_inSeconds')
-        label.remove('sum(timestamp_inSeconds)')
-
-
-        res = []
-        tmplabel = []
-
-
-
-        xyz=0
-        for l in range(len(label)) :
-            tmpLabel = label[l].split("(")
-            tmpLabel = tmpLabel[len(tmpLabel) - 1]
-            tmpLabel = tmpLabel.replace(")", "")
-            if(xyz == 0):
-                xyz=1
-                tmplabel.append(tmpLabel + ' (KWh)')
-            else :
-                xyz = 0
-                tmplabel.append(tmpLabel + ' (KW)')
-
-
-        for j in range(len(dfnew['timestamp_HH'])):
-            tmpMap = {}
-            tmpvalue = []
-            tmpMap['timestamp'] = dfnew['timestamp_HH'].to_numpy()[j]
-
-            for i in label :
-                val_new = dfnew[i].to_numpy()[j]
-
-                if (math.isnan(val_new)) :
-                    tmpvalue.append(float(0))
-                else :
-                    tmpvalue.append(float(val_new))
-
-            tmpMap['value'] = tmpvalue
-            tmpMap['label'] = tmplabel
-
-            res.append(tmpMap)
-
-        '''
-        for j in range(len(dfnew['stato'])):
-            tmpMap={}
-            tmpvalue = []
-            tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
-            #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
-
-            for i in label :
-                val_new = dfnew[i].to_numpy()[j]
-
-                if (math.isnan(val_new)) :
-                    tmpvalue.append(float(0))
-                else :
-                    tmpvalue.append(float(val_new))
-
-            tmpMap['value'] = tmpvalue
-            tmpMap['label'] = tmplabel
-
-            res.append(tmpMap)
-        '''
-        return res
-
-    except Exception as e :
-        #print(e)
-        return BAD_REQUEST
-
-
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
-def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
-    try :
-        seleziona = params['tipo']
-        giorni = params['giorni']
-        fascia_oraria = params['fascia_oraria']
-        stati = params['stati']
-        fonti = params['fonti']
-
-        df1 = query_timestamp(df, giorni)
-        df2 = query_fascia_oraria(df1, fascia_oraria)
-
         if (seleziona == 'stati') :
             df3 = query_stati_maggiore(df2, stati)
 
+            x = df3.select(*f).groupBy('timestamp_HH', 'stato', 'stato_maggiore').avg().groupBy('timestamp_HH',
+                                                                                                col('stato_maggiore').alias(
+                                                                                                    'stato')).sum().groupBy(
+                'timestamp_HH').sum().sort(col('sum(sum(avg(timestamp_inSeconds)))').asc())
+
+
         elif (seleziona == 'sotto_stati') :
             df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('timestamp_HH', 'stato').avg().groupBy('timestamp_HH').sum().sort(
+                col('sum(avg(timestamp_inSeconds))').asc())
 
         else :
             return BAD_REQUEST
 
-        f = []
-        f.append('timestamp_inSeconds')
-        # f.append('timestamp')
-        f.append('timestamp_HH')
-
-        for i in fonti :
-            f.append(i + '_emissions')
-
-        x = df3.select(*f).groupBy('timestamp_HH').sum().sort(col('sum(timestamp_inSeconds)').asc())
-        # x.show()
         dfnew = x.toPandas()
         colonna = dfnew.columns.tolist()
 
         label = colonna
         label.remove('timestamp_HH')
         # label.remove('timestamp_inSeconds')
-        label.remove('sum(timestamp_inSeconds)')
+        if (seleziona == 'stati') :
+            label.remove('sum(sum(avg(timestamp_inSeconds)))')
+            # label.remove('stato')
+        elif (seleziona == 'sotto_stati') :
+            label.remove('sum(avg(timestamp_inSeconds))')
 
         res = []
         tmplabel = []
@@ -1185,7 +1089,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
+            tmplabel.append(tmpLabel + ' (KWh)')
 
         for j in range(len(dfnew['timestamp_HH'])) :
             tmpMap = {}
@@ -1260,9 +1164,145 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
         return res
 
     except Exception as e :
-        #print(e)
+        print(e)
         return BAD_REQUEST
 
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+#todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--distribuzioneDelleEmissioniNelTempo--*-*-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-*
+def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
+    try :
+        seleziona = params['tipo']
+        giorni = params['giorni']
+        fascia_oraria = params['fascia_oraria']
+        stati = params['stati']
+        fonti = params['fonti']
+
+        df1 = query_timestamp(df, giorni)
+        df2 = query_fascia_oraria(df1, fascia_oraria)
+
+        f = []
+        f.append('stato')
+        if (seleziona == 'stati') :
+            f.append('stato_maggiore')
+        f.append('timestamp_inSeconds')
+        f.append('timestamp_HH')
+
+        for i in fonti :
+            f.append(i + '_emissions')
+
+        if (seleziona == 'stati') :
+            df3 = query_stati_maggiore(df2, stati)
+
+            x = df3.select(*f).groupBy('timestamp_HH', 'stato', 'stato_maggiore').avg().groupBy('timestamp_HH',
+                                                                                                col('stato_maggiore').alias(
+                                                                                                    'stato')).sum().groupBy(
+                'timestamp_HH').sum().sort(col('sum(sum(avg(timestamp_inSeconds)))').asc())
+
+
+        elif (seleziona == 'sotto_stati') :
+            df3 = query_stati(df2, stati)
+            x = df3.select(*f).groupBy('timestamp_HH', 'stato').avg().groupBy('timestamp_HH').sum().sort(
+                col('sum(avg(timestamp_inSeconds))').asc())
+
+        else :
+            return BAD_REQUEST
+
+        dfnew = x.toPandas()
+        colonna = dfnew.columns.tolist()
+
+        label = colonna
+        label.remove('timestamp_HH')
+        # label.remove('timestamp_inSeconds')
+        if (seleziona == 'stati') :
+            label.remove('sum(sum(avg(timestamp_inSeconds)))')
+            # label.remove('stato')
+        elif (seleziona == 'sotto_stati') :
+            label.remove('sum(avg(timestamp_inSeconds))')
+
+        res = []
+        tmplabel = []
+
+        for l in range(len(label)) :
+            tmpLabel = label[l].split("(")
+            tmpLabel = tmpLabel[len(tmpLabel) - 1]
+            tmpLabel = tmpLabel.replace(")", "")
+            tmplabel.append(tmpLabel + ' (KWh)')
+
+        for j in range(len(dfnew['timestamp_HH'])) :
+            tmpMap = {}
+            tmpvalue = []
+            tmpMap['timestamp'] = dfnew['timestamp_HH'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+        # print(res)
+        '''
+        j = 0
+        while (j < len(dfnew['timestamp_inSeconds'])) :
+
+            tmpMap = {}
+
+            tmpMap['timestamp'] = dfnew['timestamp'].to_numpy()[j]
+            # tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+            val_array_new = [0] * (len(label))
+
+            for i in range(len(label)) :
+                val_array_new[i] = float(0)
+            for k in range(6) :
+
+                for i in range(len(label)) :
+                    v = dfnew[label[i]].to_numpy()[j]
+                    if (math.isnan(v)) :
+                        val_array_new[i] = val_array_new[i] + float(0)
+                    else :
+                        val_array_new[i] = val_array_new[i] + float(v)
+                j = j + 1
+
+            for i in range(len(label)) :
+                val_array_new[i] = val_array_new[i] / float(6)
+            # tmpvalue.append(val_array_new)
+
+            # print(val_array_new)
+            tmpMap['value'] = val_array_new
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+        '''
+        '''
+        for j in range(len(dfnew['stato'])):
+            tmpMap={}
+            tmpvalue = []
+            tmpMap['timestamp']=dfnew['timestamp'].to_numpy()[j]
+            #tmpMap['stato']=dfnew['stato'].to_numpy()[j]
+
+            for i in label :
+                val_new = dfnew[i].to_numpy()[j]
+
+                if (math.isnan(val_new)) :
+                    tmpvalue.append(float(0))
+                else :
+                    tmpvalue.append(float(val_new))
+
+            tmpMap['value'] = tmpvalue
+            tmpMap['label'] = tmplabel
+
+            res.append(tmpMap)
+        '''
+        return res
+
+    except Exception as e :
+        print(e)
+        return BAD_REQUEST
 
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
 #todo-*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--creazioneFile--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*--*-*-*-
