@@ -1085,11 +1085,17 @@ def distribuzioneDellaEnergiaePotenzaDisponibileNelTempo(df, params) :#todo ok
         res = []
         tmplabel = []
 
+        xyz = 0
         for l in range(len(label)) :
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel + ' (KWh)')
+            if (xyz == 0) :
+                xyz = 1
+                tmplabel.append(tmpLabel + ' (KWh)')
+            else :
+                xyz = 0
+                tmplabel.append(tmpLabel + ' (KW)')
 
         for j in range(len(dfnew['timestamp_HH'])) :
             tmpMap = {}
@@ -1226,7 +1232,7 @@ def distribuzioneDelleEmissioniNelTempo(df, params):#todo ok
             tmpLabel = label[l].split("(")
             tmpLabel = tmpLabel[len(tmpLabel) - 1]
             tmpLabel = tmpLabel.replace(")", "")
-            tmplabel.append(tmpLabel + ' (KWh)')
+            tmplabel.append(tmpLabel + ' (Kg di CO₂eq per minuto)')
 
         for j in range(len(dfnew['timestamp_HH'])) :
             tmpMap = {}
